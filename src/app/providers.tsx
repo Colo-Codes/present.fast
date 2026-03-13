@@ -1,8 +1,9 @@
 'use client';
 
-import { ClerkProvider, useAuth } from '@clerk/nextjs';
+import { useAuth } from '@clerk/nextjs';
 import type { ReactNode } from 'react';
 
+import { AuthBootstrap } from '@/features/auth/components/auth-bootstrap';
 import { ConvexProviderWithClerk } from '@/features/auth/components/convex-provider-with-clerk';
 import { getConvexClient } from '@/lib/convex/client';
 
@@ -14,14 +15,13 @@ export const AppProviders = ({ children }: AppProvidersProps) => {
   const convex = getConvexClient();
 
   if (!convex) {
-    return <ClerkProvider>{children}</ClerkProvider>;
+    return <>{children}</>;
   }
 
   return (
-    <ClerkProvider>
-      <ConvexProviderWithClerk client={convex} useAuth={useAuth}>
-        {children}
-      </ConvexProviderWithClerk>
-    </ClerkProvider>
+    <ConvexProviderWithClerk client={convex} useAuth={useAuth}>
+      <AuthBootstrap />
+      {children}
+    </ConvexProviderWithClerk>
   );
 };
