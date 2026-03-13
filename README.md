@@ -15,12 +15,14 @@ Reusable, production-ready boilerplate for projects using:
 ## Quick Start
 
 ```bash
-cp .env.example .env.local
 yarn install
 yarn dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000).
+
+This project supports a keyless-first Clerk flow: you can start locally without configuring
+Clerk keys first. Convex protected backend auth is enabled in Stage 2 after claiming the Clerk app.
 
 ## Start a New Project From This Template
 
@@ -33,10 +35,11 @@ Use this repository as a clean starting point for a new app.
    - `cp .env.example .env.local`
    - `yarn install`
    - `yarn dev`
-3. Configure required environment variables in `.env.local`:
+3. Configure environment variables when your project needs them:
    - `NEXT_PUBLIC_CONVEX_URL`
-   - `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`
-   - `CLERK_SECRET_KEY`
+   - `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` (optional in keyless-first local flow)
+   - `CLERK_SECRET_KEY` (optional in keyless-first local flow)
+   - `CLERK_JWT_ISSUER_DOMAIN` (required when enabling Convex protected auth)
 4. Validate baseline quality before feature work:
    - `yarn check:all`
 5. Keep project structure conventions:
@@ -117,9 +120,42 @@ gh pr create --fill
 
 ## Convex + Clerk Setup
 
-1. Set env vars in `.env.local`.
-2. Ensure Clerk app is configured with Convex JWT template named `convex`.
-3. Run app with `yarn dev`.
+Detailed guide: `docs/guides/convex-clerk-setup-guide.md`
+
+### Stage A: Keyless-first Clerk setup (UI auth)
+
+1. Install dependencies and run:
+   - `yarn install`
+   - `yarn dev`
+2. Ensure `clerkMiddleware()` is configured in `src/proxy.ts`.
+3. Ensure `ClerkProvider` is rendered inside `<body>` in `src/app/layout.tsx`.
+4. Use `Show`, `SignInButton`, `SignUpButton`, and `UserButton` from `@clerk/nextjs`.
+5. Sign up as the first test user from the nav and verify the profile icon appears.
+6. If Clerk shows `Configure your application`, click it to claim the app.
+
+### Stage B: Enable Convex protected backend auth
+
+1. Set these env values:
+   - `CLERK_JWT_ISSUER_DOMAIN`
+   - `NEXT_PUBLIC_CONVEX_URL`
+2. Keep `convex/auth.config.ts` provider:
+   - `domain: process.env.CLERK_JWT_ISSUER_DOMAIN`
+   - `applicationID: "convex"`
+3. Sync Convex config:
+   - `npx convex dev`
+4. For production deployment:
+   - Set production issuer domain and keys
+   - `npx convex deploy`
+
+### Important API guardrails
+
+- Use App Router (`src/app`), not Pages Router.
+- Use `clerkMiddleware()` from `@clerk/nextjs/server`.
+- Use async/await with `auth()` from `@clerk/nextjs/server`.
+- Do not use deprecated APIs:
+  - `authMiddleware`
+  - `SignedIn` / `SignedOut`
+  - `_app.tsx` auth patterns
 
 ## AI Agent Setup
 
