@@ -45,3 +45,6 @@ convex/_generated
 # playwright
 playwright-report
 test-results
+
+# clerk configuration (can include secrets)
+/.clerk/
