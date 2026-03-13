@@ -3,19 +3,26 @@ import '@/styles/tokens.css';
 import '@/styles/themes.css';
 import '@/styles/utilities.css';
 
+import { ClerkProvider } from '@clerk/nextjs';
 import type { Metadata } from 'next';
-import { Geist } from "next/font/google";
+import { Inter, JetBrains_Mono } from 'next/font/google';
 import type { ReactNode } from 'react';
 
-import { cn } from "@/lib/utils";
+import { AuthHeader } from '@/components/auth/auth-header';
+import { ThemeProvider } from '@/components/theme-provider';
+import { cn } from '@/lib/utils';
 
 import { AppProviders } from './providers';
 
-const geist = Geist({subsets:['latin'],variable:'--font-sans'});
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
+const jetbrainsMono = JetBrains_Mono({ subsets: ['latin'], variable: '--font-jetbrains' });
 
 export const metadata: Metadata = {
-  title: 'scaffold.fast',
-  description: 'Reusable production-ready boilerplate',
+  title: {
+    default: 'present.fast',
+    template: '%s | present.fast',
+  },
+  description: 'A fast way to build presentations from markdown files.',
 };
 
 type RootLayoutProps = {
@@ -24,9 +31,16 @@ type RootLayoutProps = {
 
 const RootLayout = ({ children }: RootLayoutProps) => {
   return (
-    <html lang="en" suppressHydrationWarning className={cn("font-sans", geist.variable)}>
+    <html lang="en" suppressHydrationWarning className={cn(inter.variable, jetbrainsMono.variable)}>
       <body className="bg-background text-foreground antialiased">
-        <AppProviders>{children}</AppProviders>
+        <ClerkProvider>
+          <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
+            <AppProviders>
+              <AuthHeader />
+              {children}
+            </AppProviders>
+          </ThemeProvider>
+        </ClerkProvider>
       </body>
     </html>
   );

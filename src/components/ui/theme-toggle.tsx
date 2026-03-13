@@ -1,13 +1,57 @@
 'use client';
 
 import { Moon, Sun } from 'lucide-react';
+import { useTheme } from 'next-themes';
+import { useEffect, useState } from 'react';
 
-import { useTheme } from '@/hooks/use-theme';
+type Theme = 'light' | 'dark';
 
 export const ThemeToggle = () => {
-  const { theme, toggleTheme } = useTheme();
+  const { resolvedTheme, setTheme } = useTheme();
+  const [isMounted, setIsMounted] = useState(false);
 
-  const isDarkTheme = theme === 'dark';
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  const currentTheme: Theme = resolvedTheme === 'dark' ? 'dark' : 'light';
+  const isDarkTheme = currentTheme === 'dark';
+
+  const handleToggleTheme = () => {
+    if (isDarkTheme) {
+      setTheme('light');
+      return;
+    }
+
+    setTheme('dark');
+  };
+
+  if (!isMounted) {
+    return (
+      <button
+        type="button"
+        role="switch"
+        aria-checked={true}
+        aria-label="Toggle theme"
+        disabled
+        className="border-border bg-muted/70 relative inline-flex h-[34px] w-[68px] items-center rounded-full border opacity-70"
+      >
+        <Sun
+          className="text-muted-foreground pointer-events-none absolute top-1/2 left-2 size-4 -translate-y-1/2"
+          aria-hidden="true"
+        />
+        <Moon
+          className="text-muted-foreground pointer-events-none absolute top-1/2 right-2 size-4 -translate-y-1/2"
+          aria-hidden="true"
+        />
+        <span
+          className="bg-background border-border pointer-events-none absolute top-1/2 left-1 size-6 rounded-full border"
+          style={{ transform: 'translate(34px, -50%)' }}
+          aria-hidden="true"
+        />
+      </button>
+    );
+  }
 
   return (
     <button
@@ -15,7 +59,7 @@ export const ThemeToggle = () => {
       role="switch"
       aria-checked={isDarkTheme}
       aria-label="Toggle theme"
-      onClick={toggleTheme}
+      onClick={handleToggleTheme}
       className="border-border bg-muted/70 focus-visible:border-ring focus-visible:ring-ring/50 relative inline-flex h-[34px] w-[68px] items-center rounded-full border transition-colors hover:cursor-pointer focus-visible:ring-2 focus-visible:outline-none"
     >
       <Sun
