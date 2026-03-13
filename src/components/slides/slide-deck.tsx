@@ -1,0 +1,414 @@
+'use client';
+
+import { AnimatePresence, motion } from 'framer-motion';
+import { useRouter } from 'next/navigation';
+import { useCallback, useEffect, useRef, useState } from 'react';
+
+import { slides } from '@/lib/slides';
+
+import { CursorTrail } from './cursor-trail';
+import { SlideContent } from './slide-content';
+import { SlideHighlight } from './slide-highlight';
+import { SlideImage } from './slide-image';
+import { SlideNav } from './slide-nav';
+import { SlideProgress } from './slide-progress';
+import { SlideQuote } from './slide-quote';
+import { SlideSplit } from './slide-split';
+import { SlideThreeColumn } from './slide-three-column';
+import { SlideTitle } from './slide-title';
+
+const slideVariants = {
+  enter: (direction: number) => ({
+    x: direction > 0 ? '100%' : '-100%',
+    opacity: 0,
+    scale: 0.95,
+  }),
+  center: {
+    x: 0,
+    opacity: 1,
+    scale: 1,
+  },
+  exit: (direction: number) => ({
+    x: direction > 0 ? '-50%' : '50%',
+    opacity: 0,
+    scale: 0.95,
+  }),
+};
+
+function SlideRenderer({ slideIndex }: { slideIndex: number }) {
+  const slide = slides[slideIndex];
+  if (!slide) return null;
+
+  switch (slide.type) {
+    case 'title':
+      return <SlideTitle slide={slide} />;
+    case 'content':
+      return <SlideContent slide={slide} />;
+    case 'image':
+      return <SlideImage slide={slide} />;
+    case 'split':
+      return <SlideSplit slide={slide} />;
+    case 'quote':
+      return <SlideQuote slide={slide} />;
+    case 'three-column':
+      return <SlideThreeColumn slide={slide} />;
+    case 'highlight':
+      return <SlideHighlight slide={slide} />;
+    default:
+      return <SlideContent slide={slide} />;
+  }
+}
+
+const getSlideParentTopic = (slideId: number) => {
+  // Derived from:
+  // ~/Downloads/Private & Shared 2/Antares Presentation 31766ef7d771804cb781f8045a8ab5f9.md
+  if (slideId === 1) return 'Research Plan Implement (RPI) framework for working with AI agents';
+  if (slideId >= 2 && slideId <= 6) return 'Introduction';
+  if (slideId >= 7 && slideId <= 12) return 'Suboptimal vs optimal agent usage';
+  if (slideId >= 13 && slideId <= 19) return 'The Research -> Plan -> Implement (RPI) framework';
+  if (slideId >= 20 && slideId <= 21) return 'Closing thoughts';
+  return 'Antares Presentation';
+};
+
+export function SlideDeck() {
+  const router = useRouter();
+  const HOVER_OUT_DEBOUNCE_MS = 140;
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [direction, setDirection] = useState(0);
+  const [hoveredDot, setHoveredDot] = useState<number | null>(null);
+  const [isPointerModeActive, setIsPointerModeActive] = useState(false);
+  const [isFullscreenActive, setIsFullscreenActive] = useState(false);
+  const isAnimating = useRef(false);
+  const hoverOutAnimationFrame = useRef<number | null>(null);
+  const hoverOutStart = useRef<number | null>(null);
+  const pendingHoverOutDot = useRef<number | null>(null);
+
+  const goToSlide = useCallback(
+    (index: number) => {
+      if (isAnimating.current) return;
+      if (index < 0 || index >= slides.length) return;
+      setDirection(index > currentSlide ? 1 : -1);
+      setCurrentSlide(index);
+    },
+    [currentSlide],
+  );
+
+  const nextSlide = useCallback(() => {
+    goToSlide(currentSlide + 1);
+  }, [currentSlide, goToSlide]);
+
+  const prevSlide = useCallback(() => {
+    goToSlide(currentSlide - 1);
+  }, [currentSlide, goToSlide]);
+
+  const togglePointerMode = useCallback(() => {
+    setIsPointerModeActive((previousValue) => !previousValue);
+  }, []);
+
+  const deactivatePointerMode = useCallback(() => {
+    setIsPointerModeActive(false);
+  }, []);
+
+  const toggleFullscreen = useCallback(async () => {
+    if (!document.fullscreenEnabled) return;
+
+    if (document.fullscreenElement) {
+      await document.exitFullscreen();
+      return;
+    }
+
+    await document.documentElement.requestFullscreen();
+  }, []);
+
+  const handleExitPresentation = useCallback(async () => {
+    if (document.fullscreenElement) {
+      await document.exitFullscreen();
+    }
+
+    router.push('/dashboard');
+  }, [router]);
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreenActive(Boolean(document.fullscreenElement));
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    handleFullscreenChange();
+
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key.toLowerCase() === 'p') {
+        e.preventDefault();
+        togglePointerMode();
+        return;
+      }
+
+      if (e.key === 'Escape') {
+        if (!isPointerModeActive) return;
+        e.preventDefault();
+        deactivatePointerMode();
+        return;
+      }
+
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'Enter') {
+        e.preventDefault();
+        nextSlide();
+      } else if (e.key === 'ArrowLeft' || e.key === 'Backspace') {
+        e.preventDefault();
+        prevSlide();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [deactivatePointerMode, isPointerModeActive, nextSlide, prevSlide, togglePointerMode]);
+
+  // Touch/swipe support
+  const touchStart = useRef<number | null>(null);
+  const currentSlideData = slides[currentSlide];
+  const parentTopic = getSlideParentTopic(currentSlideData?.id ?? 0);
+  const breadcrumbParts = ['Antares Presentation', parentTopic, currentSlideData?.title ?? 'Slide'];
+
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    touchStart.current = e.touches[0].clientX;
+  }, []);
+
+  const handleTouchEnd = useCallback(
+    (e: React.TouchEvent) => {
+      if (touchStart.current === null) return;
+      const diff = touchStart.current - e.changedTouches[0].clientX;
+      if (Math.abs(diff) > 50) {
+        if (diff > 0) nextSlide();
+        else prevSlide();
+      }
+      touchStart.current = null;
+    },
+    [nextSlide, prevSlide],
+  );
+
+  useEffect(() => {
+    return () => {
+      if (hoverOutAnimationFrame.current !== null) {
+        cancelAnimationFrame(hoverOutAnimationFrame.current);
+      }
+    };
+  }, []);
+
+  const handleDotPointerEnter = useCallback((dotIndex: number) => {
+    pendingHoverOutDot.current = null;
+    hoverOutStart.current = null;
+
+    if (hoverOutAnimationFrame.current !== null) {
+      cancelAnimationFrame(hoverOutAnimationFrame.current);
+      hoverOutAnimationFrame.current = null;
+    }
+
+    setHoveredDot(dotIndex);
+  }, []);
+
+  const handleDotPointerLeave = useCallback((dotIndex: number) => {
+    pendingHoverOutDot.current = dotIndex;
+    hoverOutStart.current = null;
+
+    const debounceHoverOut = (timestamp: number) => {
+      if (pendingHoverOutDot.current !== dotIndex) {
+        hoverOutAnimationFrame.current = null;
+        return;
+      }
+
+      if (hoverOutStart.current === null) {
+        hoverOutStart.current = timestamp;
+      }
+
+      const elapsed = timestamp - hoverOutStart.current;
+      if (elapsed >= HOVER_OUT_DEBOUNCE_MS) {
+        setHoveredDot((previousHoveredDot) =>
+          previousHoveredDot === dotIndex ? null : previousHoveredDot,
+        );
+        hoverOutAnimationFrame.current = null;
+        return;
+      }
+
+      hoverOutAnimationFrame.current = requestAnimationFrame(debounceHoverOut);
+    };
+
+    if (hoverOutAnimationFrame.current !== null) {
+      cancelAnimationFrame(hoverOutAnimationFrame.current);
+    }
+
+    hoverOutAnimationFrame.current = requestAnimationFrame(debounceHoverOut);
+  }, []);
+
+  return (
+    <div
+      className="bg-background relative h-screen w-screen overflow-hidden"
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+    >
+      <nav
+        aria-label="Slide breadcrumb"
+        className="border-border/50 bg-background/70 text-muted-foreground fixed top-4 left-6 z-50 flex items-center gap-2 rounded-md border px-3 py-1.5 text-xs font-medium backdrop-blur-sm"
+      >
+        {breadcrumbParts.map((part, index) => (
+          <span key={`${part}-${index}`} className="flex items-center gap-2 text-base">
+            <span className={index === breadcrumbParts.length - 1 ? 'text-foreground' : ''}>
+              {part}
+            </span>
+            {index < breadcrumbParts.length - 1 && <span aria-hidden="true">/</span>}
+          </span>
+        ))}
+      </nav>
+      <div className="fixed top-4 right-6 z-50 flex items-center gap-2">
+        <button
+          type="button"
+          onClick={toggleFullscreen}
+          className={`focus-visible:ring-primary/50 rounded-md border px-3 py-1.5 text-sm font-medium backdrop-blur-sm transition-colors focus-visible:ring-2 focus-visible:outline-none ${
+            isFullscreenActive
+              ? 'border-primary/70 bg-primary/20 text-primary'
+              : 'border-border/50 bg-background/70 text-muted-foreground hover:border-primary/40 hover:text-foreground'
+          }`}
+          aria-label={isFullscreenActive ? 'Exit fullscreen mode' : 'Enter fullscreen mode'}
+          aria-pressed={isFullscreenActive}
+        >
+          Fullscreen {isFullscreenActive ? 'On' : 'Off'}
+        </button>
+        <button
+          type="button"
+          onClick={togglePointerMode}
+          className={`focus-visible:ring-primary/50 rounded-md border px-3 py-1.5 text-sm font-medium backdrop-blur-sm transition-colors focus-visible:ring-2 focus-visible:outline-none ${
+            isPointerModeActive
+              ? 'border-primary/70 bg-primary/20 text-primary'
+              : 'border-border/50 bg-background/70 text-muted-foreground hover:border-primary/40 hover:text-foreground'
+          }`}
+          aria-label={isPointerModeActive ? 'Disable pointer mode' : 'Enable pointer mode'}
+          aria-pressed={isPointerModeActive}
+        >
+          Pointer {isPointerModeActive ? 'On' : 'Off'}
+        </button>
+        <button
+          type="button"
+          onClick={handleExitPresentation}
+          className="border-border/50 bg-background/70 text-muted-foreground hover:border-primary/40 hover:text-foreground focus-visible:ring-primary/50 rounded-md border px-3 py-1.5 text-sm font-medium backdrop-blur-sm transition-colors focus-visible:ring-2 focus-visible:outline-none"
+          aria-label="Exit presentation"
+        >
+          Exit presentation
+        </button>
+      </div>
+
+      {/* Subtle background pattern */}
+      <div className="absolute inset-0 opacity-[0.03]">
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: 'radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)',
+            backgroundSize: '40px 40px',
+          }}
+        />
+      </div>
+
+      {/* Ambient glow */}
+      <motion.div
+        className="absolute top-[-20%] right-[-10%] h-[600px] w-[600px] rounded-full opacity-[0.04]"
+        style={{ background: 'radial-gradient(circle, var(--primary) 0%, transparent 70%)' }}
+        animate={{
+          x: [0, 30, 0],
+          y: [0, -20, 0],
+        }}
+        transition={{
+          duration: 15,
+          repeat: Infinity,
+          ease: 'easeInOut',
+        }}
+      />
+
+      {isPointerModeActive && <CursorTrail />}
+
+      <AnimatePresence
+        initial={false}
+        custom={direction}
+        mode="wait"
+        onExitComplete={() => {
+          isAnimating.current = false;
+        }}
+      >
+        <motion.div
+          key={currentSlide}
+          custom={direction}
+          variants={slideVariants}
+          initial="enter"
+          animate="center"
+          exit="exit"
+          transition={{
+            x: { type: 'spring', stiffness: 300, damping: 30 },
+            opacity: { duration: 0.3 },
+            scale: { duration: 0.3 },
+          }}
+          onAnimationStart={() => {
+            isAnimating.current = true;
+          }}
+          onAnimationComplete={() => {
+            isAnimating.current = false;
+          }}
+          className="absolute inset-0 flex items-center justify-center pb-16"
+        >
+          <SlideRenderer slideIndex={currentSlide} />
+        </motion.div>
+      </AnimatePresence>
+
+      <SlideProgress current={currentSlide} total={slides.length} />
+      <SlideNav
+        onPrev={prevSlide}
+        onNext={nextSlide}
+        hasPrev={currentSlide > 0}
+        hasNext={currentSlide < slides.length - 1}
+      />
+
+      {/* Slide indicator dots */}
+      <div className="fixed bottom-10 left-1/2 z-50 flex h-[30px] -translate-x-1/2 items-center gap-1.5">
+        {slides.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => goToSlide(i)}
+            onPointerEnter={(event) => {
+              if (event.pointerType !== 'mouse') return;
+              handleDotPointerEnter(i);
+            }}
+            onPointerLeave={(event) => {
+              if (event.pointerType !== 'mouse') return;
+              handleDotPointerLeave(i);
+            }}
+            onFocus={() => {
+              handleDotPointerEnter(i);
+            }}
+            onBlur={() => {
+              setHoveredDot((previousHoveredDot) =>
+                previousHoveredDot === i ? null : previousHoveredDot,
+              );
+            }}
+            className={`group focus-visible:ring-primary/50 flex items-center justify-center rounded-full transition-all duration-300 hover:cursor-pointer focus-visible:ring-2 focus-visible:outline-none ${
+              i === currentSlide
+                ? 'bg-primary'
+                : 'bg-muted-foreground/30 hover:bg-muted-foreground/50'
+            } ${hoveredDot === i ? 'h-[30px] w-[30px]' : 'h-3 w-3'}`}
+            aria-label={`Go to slide ${i + 1}`}
+            aria-current={i === currentSlide ? 'true' : undefined}
+          >
+            <span
+              className={`text-primary-foreground text-[16px] leading-none font-medium transition-opacity duration-200 ${
+                hoveredDot === i ? 'opacity-100' : 'opacity-0'
+              }`}
+            >
+              {i + 1}
+            </span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
