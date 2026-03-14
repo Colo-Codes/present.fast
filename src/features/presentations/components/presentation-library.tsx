@@ -128,7 +128,7 @@ export const PresentationLibrary = () => {
         {!canWrite && presentationResult !== undefined ? (
           <p className="text-muted-foreground text-xs">
             You have read-only access in this workspace. Only owners can create, edit, or share
-            decks.
+            presentations.
           </p>
         ) : null}
 

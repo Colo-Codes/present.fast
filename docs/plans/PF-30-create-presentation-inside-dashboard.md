@@ -5,11 +5,11 @@
 PF-30 introduces an end-to-end authoring flow starting from the dashboard:
 
 - User clicks `Create presentation` in dashboard.
-- App creates a new deck with default title `Untitled presentation`.
-- User is redirected to that deck editor route immediately.
+- App creates a new presentation with default title `Untitled presentation`.
+- User is redirected to that presentation editor route immediately.
 - User pastes markdown as the source of truth for content.
 - User explicitly saves markdown changes.
-- User can rename the deck from `Untitled presentation`.
+- User can rename the presentation from `Untitled presentation`.
 
 This should reuse existing Convex + Clerk + workspace permission patterns, keep route authorization intact, and add robust loading/error/a11y/test coverage.
 
@@ -17,7 +17,7 @@ This should reuse existing Convex + Clerk + workspace permission patterns, keep 
 
 ### Dashboard entry points
 
-- `src/app/dashboard/page.tsx`
+- `src/app/(app)/dashboard/page.tsx`
   - Protected by Clerk server auth (`auth()` + `redirect('/sign-in')`).
   - Renders `PresentationLibrary` as the main workspace entry point.
 - `src/features/presentations/components/presentation-library.tsx`
@@ -39,7 +39,7 @@ This should reuse existing Convex + Clerk + workspace permission patterns, keep 
   - Updates markdown and optionally title in one mutation.
   - Requires write permissions.
 - Current UI does **not** expose edit/save workflow.
-  - `src/app/presentation/[presentationId]/page.tsx` renders `PresentationRouteView`.
+- `src/app/(app)/presentation/[presentationId]/page.tsx` renders `PresentationRouteView`.
   - `src/features/presentations/components/presentation-route-view.tsx` only shows read-only snapshot states.
   - `src/features/presentations/components/presentation-snapshot.tsx` is read-only rendering.
 
@@ -47,7 +47,7 @@ This should reuse existing Convex + Clerk + workspace permission patterns, keep 
 
 - Persistent canonical content already exists as `presentations.markdownContent` in `convex/schema.ts`.
 - No current editor UI for markdown input.
-- Existing static `src/lib/slides.ts` + `SlideDeck` are demo slide assets and not wired to persisted presentation markdown.
+- Existing static demo slides now live in `src/features/presentations/model/slides.ts`, rendered by `PresentationSlides`, and are not wired to persisted presentation markdown.
 
 ### Rename/title updates
 
@@ -67,12 +67,12 @@ This should reuse existing Convex + Clerk + workspace permission patterns, keep 
 1. User opens dashboard (`/dashboard`) and sees presentation library card.
 2. User clicks `Create presentation`.
 3. Frontend triggers `createPresentation` mutation **without requiring title input**.
-4. Backend creates deck with:
+4. Backend creates presentation with:
    - `title = "Untitled presentation"` (default if not provided),
    - `markdownContent` default starter content,
    - owner workspace linkage and timestamps.
 5. Frontend redirects immediately to `/presentation/{presentationId}`.
-6. Route loads deck access via authorized query (`getPresentationRouteAccess`).
+6. Route loads presentation access via authorized query (`getPresentationRouteAccess`).
 7. If `canWrite=true`, render editable authoring view:
    - title input (rename),
    - markdown textarea (paste/edit),
@@ -101,7 +101,7 @@ This should reuse existing Convex + Clerk + workspace permission patterns, keep 
 ### Reference strategy (existing analogues)
 
 - **High confidence**
-  - Dashboard auth/page shell: `src/app/dashboard/page.tsx`
+  - Dashboard auth/page shell: `src/app/(app)/dashboard/page.tsx`
   - Workspace permission checks: `convex/lib/permissions.ts`
   - Provisioning entrypoint: `convex/lib/provisioning.ts`
   - Mutation loading/error handling pattern: `presentation-library.tsx`
@@ -165,7 +165,7 @@ Key details:
 
 ### 4) Pages and routes
 
-[MODIFY] `src/app/presentation/[presentationId]/page.tsx`
+[MODIFY] `src/app/(app)/presentation/[presentationId]/page.tsx`
 Purpose: Keep route auth contract while delegating to upgraded feature view.
 Pattern source: Existing page auth handling + `PresentationRouteView`.
 Confidence: High.
@@ -174,7 +174,7 @@ Key details:
 - Preserve current sign-in guidance for unauthenticated access.
 - Keep E2E compatibility flags only if still required by tests; otherwise remove technical test-only branch in follow-up cleanup.
 
-[MODIFY] `src/app/presentation/page.tsx`
+[MODIFY] `src/app/(app)/presentation/page.tsx`
 Purpose: Preserve redirect behavior (`/presentation` -> `/dashboard`) unless product wants quick-create direct route.
 Pattern source: Existing redirect-only page.
 Confidence: High.
@@ -185,7 +185,7 @@ Key details:
 ### 5) Feature components
 
 [MODIFY] `src/features/presentations/components/presentation-library.tsx`
-Purpose: Dashboard create entrypoint should create untitled deck and redirect.
+Purpose: Dashboard create entrypoint should create untitled presentation and redirect.
 Pattern source: Existing create/list/share interactions and loading/error pattern.
 Confidence: High.
 Key details:
@@ -326,10 +326,10 @@ Key details:
 
 ### Edge cases
 
-- Double-click create causing duplicate decks -> disable while mutation pending.
+- Double-click create causing duplicate presentations -> disable while mutation pending.
 - Blank/whitespace-only title on rename -> inline validation + backend rejection.
 - Backend unavailable (`NEXT_PUBLIC_CONVEX_URL` missing) -> retain existing graceful fallback card.
-- Read-only member opens deck route -> allowed to view snapshot, cannot edit/save/rename.
+- Read-only member opens presentation route -> allowed to view snapshot, cannot edit/save/rename.
 - Stale editor data after external update -> baseline: Convex query refresh updates source; if dirty local edits exist, avoid clobbering draft without user decision.
 - Navigation away with unsaved changes -> optional beforeunload warning (question for product).
 
@@ -365,7 +365,7 @@ Key details:
   - save updates markdown and updatedAt.
   - non-owner/member denied write operations.
 - `convex/presentations/queries.ts`
-  - authorized status includes deck payload,
+  - authorized status includes presentation payload,
   - forbidden/not_found/unauthenticated branch integrity,
   - public share remains unaffected.
 - Component integration targets (React Testing Library) for editor:
@@ -386,7 +386,7 @@ Key details:
   - reload persists both title and markdown.
 - Key failures:
   - read-only user cannot create from dashboard.
-  - read-only user on deck route sees non-editable view and no save capability.
+  - read-only user on presentation route sees non-editable view and no save capability.
   - invalid rename (blank title) shows validation.
   - mutation failure surfaces inline error and does not lose draft.
   - signed-out access still follows existing login-required behavior.

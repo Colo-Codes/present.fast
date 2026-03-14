@@ -131,8 +131,8 @@ describe('presentation authorization queries', () => {
       presentationById: {
         _id: 'presentation_1',
         workspaceId: 'workspace_b',
-        title: 'Deck',
-        markdownContent: '# Deck',
+        title: 'Presentation',
+        markdownContent: '# Presentation',
         updatedAt: 1700000000000,
         isPublicShareEnabled: false,
       },
@@ -147,15 +147,15 @@ describe('presentation authorization queries', () => {
     expect(result).toEqual({ status: 'forbidden' });
   });
 
-  it('returns authorized when user belongs to deck workspace', async () => {
+  it('returns authorized when user belongs to presentation workspace', async () => {
     const ctx = createQueryContext({
       identitySubject: 'clerk_owner',
       user: { _id: 'user_owner', clerkId: 'clerk_owner' },
       presentationById: {
         _id: 'presentation_1',
         workspaceId: 'workspace_1',
-        title: 'Deck',
-        markdownContent: '# Deck',
+        title: 'Presentation',
+        markdownContent: '# Presentation',
         updatedAt: 1700000000000,
         isPublicShareEnabled: false,
       },
@@ -177,8 +177,8 @@ describe('presentation authorization queries', () => {
         canWrite: true,
         viewerRole: 'owner',
         presentation: expect.objectContaining({
-          title: 'Deck',
-          markdownContent: '# Deck',
+          title: 'Presentation',
+          markdownContent: '# Presentation',
           updatedAt: 1700000000000,
         }),
       }),
@@ -192,8 +192,8 @@ describe('presentation authorization queries', () => {
       presentationById: {
         _id: 'presentation_1',
         workspaceId: 'workspace_1',
-        title: 'Deck',
-        markdownContent: '# Deck',
+        title: 'Presentation',
+        markdownContent: '# Presentation',
         updatedAt: 1700000000000,
         isPublicShareEnabled: false,
       },
@@ -215,8 +215,8 @@ describe('presentation authorization queries', () => {
         canWrite: false,
         viewerRole: 'member',
         presentation: expect.objectContaining({
-          title: 'Deck',
-          markdownContent: '# Deck',
+          title: 'Presentation',
+          markdownContent: '# Presentation',
           updatedAt: 1700000000000,
         }),
       }),
@@ -233,7 +233,7 @@ describe('public share token query', () => {
       presentationByToken: {
         _id: 'presentation_1',
         workspaceId: 'workspace_1',
-        title: 'Private Deck',
+        title: 'Private Presentation',
         markdownContent: '# Private',
         updatedAt: 1700000000000,
         isPublicShareEnabled: false,
@@ -257,7 +257,7 @@ describe('public share token query', () => {
       presentationByToken: {
         _id: 'presentation_1',
         workspaceId: 'workspace_1',
-        title: 'Shared Deck',
+        title: 'Shared Presentation',
         markdownContent: '# Shared',
         updatedAt: 1700000000000,
         isPublicShareEnabled: true,
@@ -272,7 +272,7 @@ describe('public share token query', () => {
 
     expect(result).toEqual({
       presentationId: 'presentation_1',
-      title: 'Shared Deck',
+      title: 'Shared Presentation',
       markdownContent: '# Shared',
       updatedAt: 1700000000000,
       sharedAt: 1700000000000,

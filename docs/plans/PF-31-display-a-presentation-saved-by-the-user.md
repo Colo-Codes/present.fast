@@ -19,15 +19,15 @@ Scope for this task:
 
 What already exists:
 
-- deck persistence (`title`, `markdownContent`, `updatedAt`) from PF-30,
+- presentation persistence (`title`, `markdownContent`, `updatedAt`) from PF-30,
 - route authorization union in `getPresentationRouteAccess`,
 - slide presentation components in `src/components/slides/*`,
-- `SlideData` contract in `src/lib/slides.ts`.
+- `SlideData` contract in `src/features/presentations/model/slides.ts`.
 
 What is missing:
 
 - a markdown -> `SlideData[]` transformation path for persisted user content,
-- a slide deck component that can render dynamic slide arrays (today `slide-deck.tsx` imports static `slides`),
+- a presentation slide component that can render dynamic slide arrays (today `presentation-slides.tsx` imports static `slides`),
 - owner display mode wired to dynamic slide rendering.
 
 ---
@@ -37,7 +37,7 @@ What is missing:
 Use existing slide components as the rendering engine and add a minimal adapter layer:
 
 1. Parse saved markdown into normalized `SlideData[]`.
-2. Feed parsed slides into a dynamic deck renderer (based on current `SlideDeck` behavior).
+2. Feed parsed slides into a dynamic presentation renderer (based on current `PresentationSlides` behavior).
 3. Use that renderer in owner display mode (`?mode=display`) on `/presentation/[presentationId]`.
 
 This avoids inventing a second rendering system and keeps PF-31 aligned with current slide UI/animations.
@@ -46,7 +46,7 @@ This avoids inventing a second rendering system and keeps PF-31 aligned with cur
 
 ## 4) File plan
 
-[MODIFY] `src/app/presentation/[presentationId]/page.tsx`
+[MODIFY] `src/app/(app)/presentation/[presentationId]/page.tsx`
 Purpose: pass `mode` (`edit` | `display`) into route view.
 
 Key details:
@@ -67,7 +67,7 @@ Key details:
   - `!canWrite` -> existing read-only behavior (no regression).
 - Keep exhaustive switch handling for status union.
 
-[CREATE] `src/lib/presentation-markdown-to-slides.ts`
+[CREATE] `src/features/presentations/lib/presentation-markdown-to-slides.ts`
 Purpose: convert saved presentation markdown into `SlideData[]`.
 
 Key details:
@@ -84,7 +84,7 @@ Key details:
   - produce at least one valid fallback slide when content exists,
   - return an explicit empty slide set for blank markdown.
 
-[MODIFY] `src/components/slides/slide-deck.tsx`
+[MODIFY] `src/features/presentations/components/slides/presentation-slides.tsx`
 Purpose: support dynamic slide input instead of only static import from `src/lib/slides`.
 
 Key details:
@@ -96,7 +96,7 @@ Key details:
 - Ensure types remain strict and exhaustive for `slide.type` renderer switch.
 
 [CREATE] `src/features/presentations/components/presentation-display-scaffold.tsx`
-Purpose: owner display mode wrapper that wires persisted markdown to dynamic deck rendering.
+Purpose: owner display mode wrapper that wires persisted markdown to dynamic presentation rendering.
 
 Key details:
 
@@ -104,7 +104,7 @@ Key details:
 - Parse markdown with `parsePresentationMarkdownToSlides`.
 - Render states:
   - empty markdown -> friendly empty-state UI with CTA back to edit,
-  - parse produced slides -> render dynamic `SlideDeck`,
+  - parse produced slides -> render dynamic `PresentationSlides`,
   - parse failure fallback (if any defensive branch) -> non-blocking message + back to edit.
 - Include mode navigation controls:
   - back to editor (`/presentation/{id}`),
@@ -151,7 +151,7 @@ Purpose: smoke-check owner display route with rendered slide UI.
 Key details:
 
 - Add signed-in owner path that opens `?mode=display`.
-- Assert slide UI markers (deck container/nav/progress or known slide title) render.
+- Assert slide UI markers (presentation container/nav/progress or known slide title) render.
 - Keep signed-out and share-token smoke coverage unchanged.
 
 ---
@@ -161,7 +161,7 @@ Key details:
 - [x] Add `mode` query support to `/presentation/[presentationId]`.
 - [x] Add owner display branch in `PresentationRouteView`.
 - [x] Implement markdown -> `SlideData[]` parser utility.
-- [x] Make `SlideDeck` accept dynamic slides.
+- [x] Make `PresentationSlides` accept dynamic slides.
 - [x] Build owner display scaffold that renders parsed slides.
 - [x] Add editor action linking to display mode.
 - [x] Keep member/share/signed-out branches behaviorally unchanged.
@@ -175,7 +175,7 @@ Key details:
 Functional:
 
 - Owner can open `/presentation/{id}?mode=display`.
-- The saved markdown is rendered as slides using `src/components/slides/*` rendering stack.
+- The saved markdown is rendered as slides using `PresentationSlides` and `src/components/slides/*` rendering stack.
 - Display mode shows the latest saved version (not unsaved in-memory editor draft).
 - Owner can navigate back to edit mode.
 
@@ -195,8 +195,8 @@ Quality:
 
 ## 7) Open decisions (resolve before implementation)
 
-1. **Markdown slide syntax contract**: finalize exact markdown format the parser supports (section delimiter, image/source metadata, quote blocks, etc.). Use the demo slides in src/components/slides/\*.ts as a reference. Using `---` in markdown should indicate a new slide.
-2. **Parser placement**: keep parser in `src/lib/` as a pure utility (recommended) vs feature-local. Keep the parser in `src/lib/`.
+1. **Markdown slide syntax contract**: finalize exact markdown format the parser supports (section delimiter, image/source metadata, quote blocks, etc.). Use the demo slides in `src/features/presentations/model/slides.ts` as a reference. Using `---` in markdown should indicate a new slide.
+2. **Parser placement**: keep parser as a pure utility under `src/features/presentations/lib/` (recommended) vs generic `src/lib/`. Keep the parser in `src/features/presentations/lib/`.
 3. **Display fallback UX**: for unsupported markdown patterns, show fallback content slide vs explicit “unsupported format” notice. Show a fallback content slide.
 
 ---
@@ -205,7 +205,7 @@ Quality:
 
 1. Define and lock markdown -> slide mapping contract.
 2. Implement parser utility + unit tests.
-3. Refactor `SlideDeck` to accept dynamic slides.
+3. Implement `PresentationSlides` to accept dynamic slides.
 4. Wire owner display scaffold and route mode branch.
 5. Add editor navigation action.
 6. Run integration/e2e smoke checks and regression pass.

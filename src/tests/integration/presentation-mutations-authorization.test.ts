@@ -37,7 +37,7 @@ const createMutationContext = ({
           return {
             _id: 'presentation_1',
             workspaceId: presentationWorkspaceId,
-            title: 'Deck',
+            title: 'Presentation',
             markdownContent: '# Existing',
             updatedAt: 1700000000000,
           };
@@ -164,7 +164,7 @@ describe('presentation mutation authorization', () => {
             return {
               _id: 'presentation_1',
               workspaceId: 'workspace_a',
-              title: 'Deck',
+              title: 'Presentation',
               markdownContent: '# Existing',
               updatedAt: 1700000000000,
             };
@@ -216,19 +216,19 @@ describe('presentation mutation authorization', () => {
     const result = await (updatePresentationMarkdown as any).handler(ctx, {
       presentationId: 'presentation_1',
       markdownContent: '# Saved content',
-      title: 'Renamed deck',
+      title: 'Renamed presentation',
     });
 
     expect(result).toEqual(
       expect.objectContaining({
         presentationId: 'presentation_1',
-        title: 'Renamed deck',
+        title: 'Renamed presentation',
       }),
     );
     expect(typeof result.updatedAt).toBe('number');
     expect(patchSpy).toHaveBeenCalledWith('presentation_1', {
       markdownContent: '# Saved content',
-      title: 'Renamed deck',
+      title: 'Renamed presentation',
       updatedAt: result.updatedAt,
     });
   });

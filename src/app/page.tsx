@@ -18,7 +18,7 @@ const productFeatures = [
     icon: FileText,
   },
   {
-    title: 'Deck templates',
+    title: 'Presentation templates',
     description: 'Start from presentation layouts tailored for demos, pitches, and internal docs.',
     icon: LayoutTemplate,
   },
@@ -39,7 +39,7 @@ const HomePage = () => {
             Build beautiful presentations from markdown files.
           </h1>
           <p className="text-muted-foreground max-w-2xl text-base md:text-lg">
-            present.fast helps teams turn markdown into reusable, shareable slide decks with a
+            present.fast helps teams turn markdown into reusable, shareable presentations with a
             simple product workflow.
           </p>
           <div className="flex flex-wrap gap-3 pt-2">

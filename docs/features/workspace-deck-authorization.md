@@ -1,23 +1,23 @@
-# Workspace and Deck Authorization
+# Workspace and Presentation Authorization
 
 ## Scope
 
-This document summarizes the authorization behavior for workspace and deck access after PF-001.
+This document summarizes the authorization behavior for workspace and presentation access after PF-001.
 
 ## Authorization Policy
 
 - Workspace read access: `owner` and `member`.
-- Workspace/deck write access: `owner` only.
-- Protected deck route: `/presentation/[presentationId]`.
+- Workspace/presentation write access: `owner` only.
+- Protected presentation route: `/presentation/[presentationId]`.
 - Public share route: `/share/[token]` returns snapshot-style, read-only view only.
 
 ## Route Behavior
 
-### Protected deck route
+### Protected presentation route
 
 - Signed-out users: see login-required prompt and sign-in path.
 - Signed-in users without workspace membership: see explicit unauthorized message.
-- Signed-in users with membership: can view deck snapshot.
+- Signed-in users with membership: can view presentation snapshot.
 
 ### Share route
 

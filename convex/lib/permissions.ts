@@ -16,7 +16,7 @@ type PermissionContext = {
 export const AUTHORIZATION_ERROR_MESSAGES = {
   userMissing: 'User profile does not exist.',
   readDenied: 'You are not authorized to access this workspace.',
-  writeDenied: 'Only workspace owners can modify this deck.',
+  writeDenied: 'Only workspace owners can modify this presentation.',
 } as const;
 
 export const hasMatchingUserAccess = (

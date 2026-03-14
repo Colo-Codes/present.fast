@@ -24,7 +24,7 @@ graph TB
   M --> DB[(presentations table)]
 
   D --> X["parsePresentationMarkdownToSlides"]
-  X --> K["SlideDeck (dynamic slides prop)"]
+  X --> K["PresentationSlides (dynamic slides prop)"]
   K --> C["Slide renderer components"]
 
   SH["/share/[token] page"] --> Q["getPublicPresentationByShareToken query"]
@@ -41,19 +41,23 @@ graph TB
 ```text
 src/
 ├─ app/
-│  ├─ presentation/[presentationId]/page.tsx        # Parses mode query, guards signed-out/forbidden fixtures, mounts route view
-│  └─ share/[token]/page.tsx                        # Existing public snapshot route (unchanged PF-31 behavior)
-├─ components/slides/
-│  └─ slide-deck.tsx                                # Accepts dynamic SlideData[] input while preserving controls/animation
+│  ├─ (app)/presentation/[presentationId]/page.tsx  # Parses mode query, guards signed-out/forbidden fixtures, mounts route view
+│  └─ (app)/share/[token]/page.tsx                  # Existing public snapshot route (unchanged PF-31 behavior)
+├─ components/slides/                               # Shared slide primitives used by PresentationSlides
+│  ├─ slide-content.tsx
+│  ├─ slide-image.tsx
+│  └─ ...
 ├─ config/
 │  └─ routes.ts                                     # Adds presentationDisplayById(...)
 ├─ features/presentations/components/
 │  ├─ presentation-route-view.tsx                   # Branches edit/display/member states from route-access union
-│  ├─ presentation-display-scaffold.tsx             # Parses saved markdown, renders deck or fallback states
+│  ├─ presentation-display-scaffold.tsx             # Parses saved markdown, renders presentation or fallback states
 │  ├─ presentation-editor.tsx                       # Save flow + "Display saved slides" navigation
 │  └─ presentation-snapshot.tsx                     # Existing read-only markdown snapshot view
-├─ lib/
+├─ features/presentations/lib/
 │  └─ presentation-markdown-to-slides.ts            # Markdown -> SlideData[] parser with safe fallback behavior
+├─ features/presentations/model/
+│  └─ slides.ts                                     # SlideData and default demo slides
 └─ tests/
    ├─ unit/presentation-markdown-to-slides.test.ts # Parser behavior and resilience tests
    ├─ integration/presentation-authorization.test.ts# Authorization payload checks incl title/markdown/updatedAt
@@ -77,7 +81,7 @@ PF-31 does not add new Convex schema fields; it consumes existing `title`, `mark
 
 ## Route and Auth Flow (Edit vs Display vs Member vs Share)
 
-- `src/app/presentation/[presentationId]/page.tsx` normalizes `searchParams.mode` to `'edit' | 'display'` (default `'edit'`).
+- `src/app/(app)/presentation/[presentationId]/page.tsx` normalizes `searchParams.mode` to `'edit' | 'display'` (default `'edit'`).
 - Signed-out users are blocked before client query execution and see login-required UI.
 - `PresentationRouteView` queries `getPresentationRouteAccess` and exhaustively handles:
   - `unauthenticated` -> login prompt
@@ -102,7 +106,7 @@ sequenceDiagram
   participant Route as PresentationRouteView
   participant Display as PresentationDisplayScaffold
   participant Parser as parsePresentationMarkdownToSlides
-  participant Deck as SlideDeck
+  participant PresentationSlides as PresentationSlides
 
   Owner->>Edit: Edit title + markdown
   Edit->>Mut: mutate({ presentationId, title, markdownContent })
@@ -114,8 +118,8 @@ sequenceDiagram
   Route->>Display: authorized owner + presentation payload
   Display->>Parser: parse(markdownContent)
   Parser-->>Display: SlideData[]
-  Display->>Deck: render slides prop + presentationTitle
-  Deck-->>Owner: interactive slide UI (nav, progress, fullscreen, pointer)
+  Display->>PresentationSlides: render slides prop + presentationTitle
+  PresentationSlides-->>Owner: interactive slide UI (nav, progress, fullscreen, pointer)
 ```
 
 ---
@@ -127,7 +131,7 @@ sequenceDiagram
   - Supports explicit `type:` markers for `title|content|image|split|quote|three-column|highlight`.
   - Infers slide type from heading/bullets/quotes/images when type marker is absent.
   - Never throws to callers; returns safe fallback content slides when sections are malformed.
-- `SlideDeck`:
+- `PresentationSlides`:
   - Accepts optional `slides` prop, defaulting to static demo slides for backward compatibility.
   - Preserves keyboard/touch navigation, fullscreen, pointer mode, progress/nav controls, and exhaustive slide-type rendering.
 - `PresentationDisplayScaffold`:
@@ -151,7 +155,7 @@ sequenceDiagram
   - Confirms route-access payload for owner/member includes `title`, `markdownContent`, `updatedAt`.
   - Keeps forbidden/member/share token behavior expectations.
 - E2E smoke: `src/tests/e2e/smoke.spec.ts`
-  - Signed-out deck route and display-mode route show login prompt.
+  - Signed-out presentation route and display-mode route show login prompt.
   - Unauthorized fixture shows explicit forbidden UI.
   - Share token snapshot route still renders as expected.
 
@@ -161,10 +165,11 @@ sequenceDiagram
 
 - Display rendering is owner-only on protected route; members and share links still use snapshot markdown view (intentional scope control).
 - Parser supports a pragmatic markdown subset and heuristic type inference; complex markdown structures may collapse into generic content slides.
-- `SlideDeck` breadcrumb parent-topic logic is optimized for default demo slides; dynamic decks fall back to simpler breadcrumb structure.
-- Slide parser currently runs client-side in display scaffold; server-side pre-parse/caching could reduce repeated parsing for large decks.
+- `PresentationSlides` breadcrumb parent-topic logic is optimized for default demo slides; dynamic presentations fall back to simpler breadcrumb structure.
+- Slide parser currently runs client-side in display scaffold; server-side pre-parse/caching could reduce repeated parsing for large presentations.
 
 Next steps:
+
 - Add a share-display experience (slide rendering for public links) if product requires parity with owner display mode.
 - Expand parser contract for richer layouts (speaker notes, per-slide metadata, advanced image/columns syntax).
 - Add dedicated E2E for signed-in owner display rendering with real saved markdown content.
@@ -173,7 +178,7 @@ Next steps:
 
 ## Deployment Steps
 
-1. Deploy frontend changes (Next.js route/view/parser/deck wiring).
+1. Deploy frontend changes (Next.js route/view/parser/presentation wiring).
 2. Deploy Convex functions if branch includes query/mutation changes (`npx convex deploy`) even though PF-31 introduces no schema migration.
 3. Verify environment has Clerk + Convex variables already used by protected routes.
 4. Run PF-31 validation set before merge:

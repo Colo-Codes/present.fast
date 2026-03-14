@@ -14,14 +14,14 @@ test('dashboard is protected for signed-out users', async ({ page }) => {
   await expect(page).toHaveURL(/sign-in/);
 });
 
-test('signed-out users see login prompt on deck route', async ({ page }) => {
+test('signed-out users see login prompt on presentation route', async ({ page }) => {
   const response = await page.goto('/presentation/j57d3g0r6phdp2jvga62a74n4h7m7mjy');
 
   expect(response?.ok()).toBeTruthy();
   await expect(page.getByRole('heading', { name: 'Login required' })).toBeVisible();
 });
 
-test('signed-out users see login prompt on deck display mode route', async ({ page }) => {
+test('signed-out users see login prompt on presentation display mode route', async ({ page }) => {
   const response = await page.goto('/presentation/j57d3g0r6phdp2jvga62a74n4h7m7mjy?mode=display');
 
   expect(response?.ok()).toBeTruthy();
@@ -41,13 +41,13 @@ test('signed-in unauthorized users see explicit unauthorized message', async ({ 
 
   expect(response?.ok()).toBeTruthy();
   await expect(page.getByRole('heading', { name: 'Not authorized' })).toBeVisible();
-  await expect(page.getByText('You are not authorized to access this deck.')).toBeVisible();
+  await expect(page.getByText('You are not authorized to access this presentation.')).toBeVisible();
 });
 
 test('valid share token renders snapshot view', async ({ page }) => {
   const response = await page.goto('/share/e2e-valid-share-token?e2e=snapshot');
 
   expect(response?.ok()).toBeTruthy();
-  await expect(page.getByRole('heading', { name: 'E2E Shared Deck' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'E2E Shared Presentation' })).toBeVisible();
   await expect(page.getByText('This is a shared snapshot view.')).toBeVisible();
 });
