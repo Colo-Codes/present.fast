@@ -21,6 +21,13 @@ test('signed-out users see login prompt on deck route', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'Login required' })).toBeVisible();
 });
 
+test('signed-out users see login prompt on deck display mode route', async ({ page }) => {
+  const response = await page.goto('/presentation/j57d3g0r6phdp2jvga62a74n4h7m7mjy?mode=display');
+
+  expect(response?.ok()).toBeTruthy();
+  await expect(page.getByRole('heading', { name: 'Login required' })).toBeVisible();
+});
+
 test('invalid share tokens return not found', async ({ page }) => {
   const response = await page.goto('/share/demo-token');
 
@@ -28,7 +35,9 @@ test('invalid share tokens return not found', async ({ page }) => {
 });
 
 test('signed-in unauthorized users see explicit unauthorized message', async ({ page }) => {
-  const response = await page.goto('/presentation/j57d3g0r6phdp2jvga62a74n4h7m7mz?e2e=forbidden');
+  const response = await page.goto(
+    '/presentation/j57d3g0r6phdp2jvga62a74n4h7m7mz?e2e=forbidden&mode=display',
+  );
 
   expect(response?.ok()).toBeTruthy();
   await expect(page.getByRole('heading', { name: 'Not authorized' })).toBeVisible();

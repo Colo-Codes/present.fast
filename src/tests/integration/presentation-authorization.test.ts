@@ -179,6 +179,7 @@ describe('presentation authorization queries', () => {
         presentation: expect.objectContaining({
           title: 'Deck',
           markdownContent: '# Deck',
+          updatedAt: 1700000000000,
         }),
       }),
     );
@@ -213,6 +214,11 @@ describe('presentation authorization queries', () => {
         status: 'authorized',
         canWrite: false,
         viewerRole: 'member',
+        presentation: expect.objectContaining({
+          title: 'Deck',
+          markdownContent: '# Deck',
+          updatedAt: 1700000000000,
+        }),
       }),
     );
   });

@@ -1,7 +1,7 @@
 'use client';
 
 import { useMutation } from 'convex/react';
-import { ArrowLeft, ChevronRight, Loader2, Save } from 'lucide-react';
+import { ArrowLeft, ChevronRight, Loader2, MonitorPlay, Save } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 
@@ -217,10 +217,17 @@ const PresentationEditor = ({ presentation }: PresentationEditorProps) => {
               </>
             )}
           </Button>
+          <Button asChild type="button" variant="outline">
+            <Link href={routes.presentationDisplayById(presentation._id)} aria-label="Display saved slides">
+              <MonitorPlay className="mr-2 size-4" />
+              Display saved slides
+            </Link>
+          </Button>
           <p className="text-muted-foreground text-xs" aria-live="polite">
             {isDirty ? 'Unsaved changes.' : 'All changes saved.'}
           </p>
         </div>
+        <p className="text-muted-foreground text-xs">Display mode renders the latest saved content.</p>
 
         {saveStatusMessage ? (
           <p className="text-sm text-emerald-600" aria-live="polite">

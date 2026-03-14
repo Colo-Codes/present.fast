@@ -4,7 +4,8 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { slides } from '@/lib/slides';
+import type { SlideData } from '@/lib/slides';
+import { slides as defaultSlides } from '@/lib/slides';
 
 import { CursorTrail } from './cursor-trail';
 import { SlideContent } from './slide-content';
@@ -35,8 +36,7 @@ const slideVariants = {
   }),
 };
 
-function SlideRenderer({ slideIndex }: { slideIndex: number }) {
-  const slide = slides[slideIndex];
+const SlideRenderer = ({ slide }: { slide: SlideData }) => {
   if (!slide) return null;
 
   switch (slide.type) {
@@ -54,10 +54,12 @@ function SlideRenderer({ slideIndex }: { slideIndex: number }) {
       return <SlideThreeColumn slide={slide} />;
     case 'highlight':
       return <SlideHighlight slide={slide} />;
-    default:
-      return <SlideContent slide={slide} />;
+    default: {
+      const exhaustiveSlideType: never = slide.type;
+      return exhaustiveSlideType;
+    }
   }
-}
+};
 
 const getSlideParentTopic = (slideId: number) => {
   // Derived from:
@@ -70,8 +72,19 @@ const getSlideParentTopic = (slideId: number) => {
   return 'Antares Presentation';
 };
 
-export function SlideDeck() {
+type SlideDeckProps = {
+  slides?: SlideData[];
+  presentationTitle?: string;
+  onExitPresentation?: () => void | Promise<void>;
+};
+
+export function SlideDeck({
+  slides: slidesProp,
+  presentationTitle,
+  onExitPresentation,
+}: SlideDeckProps) {
   const router = useRouter();
+  const slides = slidesProp ?? defaultSlides;
   const HOVER_OUT_DEBOUNCE_MS = 140;
   const [currentSlide, setCurrentSlide] = useState(0);
   const [direction, setDirection] = useState(0);
@@ -82,6 +95,21 @@ export function SlideDeck() {
   const hoverOutAnimationFrame = useRef<number | null>(null);
   const hoverOutStart = useRef<number | null>(null);
   const pendingHoverOutDot = useRef<number | null>(null);
+
+  const isUsingDefaultSlides = slidesProp === undefined;
+
+  useEffect(() => {
+    if (slides.length === 0) {
+      setCurrentSlide(0);
+      return;
+    }
+
+    if (currentSlide <= slides.length - 1) {
+      return;
+    }
+
+    setCurrentSlide(slides.length - 1);
+  }, [currentSlide, slides.length]);
 
   const goToSlide = useCallback(
     (index: number) => {
@@ -125,8 +153,13 @@ export function SlideDeck() {
       await document.exitFullscreen();
     }
 
+    if (onExitPresentation) {
+      await onExitPresentation();
+      return;
+    }
+
     router.push('/dashboard');
-  }, [router]);
+  }, [onExitPresentation, router]);
 
   useEffect(() => {
     const handleFullscreenChange = () => {
@@ -172,8 +205,12 @@ export function SlideDeck() {
   // Touch/swipe support
   const touchStart = useRef<number | null>(null);
   const currentSlideData = slides[currentSlide];
+  const fallbackDeckTitle = 'Antares Presentation';
+  const deckTitle = presentationTitle?.trim() || fallbackDeckTitle;
   const parentTopic = getSlideParentTopic(currentSlideData?.id ?? 0);
-  const breadcrumbParts = ['Antares Presentation', parentTopic, currentSlideData?.title ?? 'Slide'];
+  const breadcrumbParts = isUsingDefaultSlides
+    ? [deckTitle, parentTopic, currentSlideData?.title ?? 'Slide']
+    : [deckTitle, currentSlideData?.title ?? 'Slide'];
 
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
     touchStart.current = e.touches[0].clientX;
@@ -357,7 +394,7 @@ export function SlideDeck() {
           }}
           className="absolute inset-0 flex items-center justify-center pb-16"
         >
-          <SlideRenderer slideIndex={currentSlide} />
+          {currentSlideData ? <SlideRenderer slide={currentSlideData} /> : null}
         </motion.div>
       </AnimatePresence>
 

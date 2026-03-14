@@ -7,6 +7,7 @@ import { routes } from '@/config/routes';
 
 import { api } from '../../../../convex/_generated/api';
 import type { Id } from '../../../../convex/_generated/dataModel';
+import PresentationDisplayScaffold from './presentation-display-scaffold';
 import PresentationEditor from './presentation-editor';
 import PresentationSnapshot from './presentation-snapshot';
 
@@ -28,9 +29,10 @@ type PresentationRouteAccess =
 
 type PresentationRouteViewProps = {
   presentationId: string;
+  mode: 'edit' | 'display';
 };
 
-const PresentationRouteView = ({ presentationId }: PresentationRouteViewProps) => {
+const PresentationRouteView = ({ presentationId, mode }: PresentationRouteViewProps) => {
   const accessResult = useQuery(
     api.presentations.queries.getPresentationRouteAccess as any,
     {
@@ -87,6 +89,17 @@ const PresentationRouteView = ({ presentationId }: PresentationRouteViewProps) =
       );
     case 'authorized':
       if (accessResult.canWrite) {
+        if (mode === 'display') {
+          return (
+            <PresentationDisplayScaffold
+              presentationId={accessResult.presentation._id as string}
+              title={accessResult.presentation.title}
+              markdownContent={accessResult.presentation.markdownContent}
+              updatedAt={accessResult.presentation.updatedAt}
+            />
+          );
+        }
+
         return (
           <PresentationEditor
             presentation={{

@@ -10,6 +10,7 @@ type PresentationPageProps = {
   }>;
   searchParams: Promise<{
     e2e?: string;
+    mode?: string;
   }>;
 };
 
@@ -20,8 +21,9 @@ export const metadata: Metadata = {
 
 const PresentationByIdPage = async ({ params, searchParams }: PresentationPageProps) => {
   const { presentationId } = await params;
-  const { e2e } = await searchParams;
+  const { e2e, mode } = await searchParams;
   const { userId } = await auth();
+  const normalizedMode = mode === 'display' ? 'display' : 'edit';
   const isE2EForbiddenPresentation =
     e2e === 'forbidden' && presentationId === 'j57d3g0r6phdp2jvga62a74n4h7m7mz';
 
@@ -60,7 +62,7 @@ const PresentationByIdPage = async ({ params, searchParams }: PresentationPagePr
     );
   }
 
-  return <PresentationRouteView presentationId={presentationId} />;
+  return <PresentationRouteView presentationId={presentationId} mode={normalizedMode} />;
 };
 
 export default PresentationByIdPage;
