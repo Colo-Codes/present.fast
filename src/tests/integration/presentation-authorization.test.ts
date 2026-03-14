@@ -176,6 +176,43 @@ describe('presentation authorization queries', () => {
         status: 'authorized',
         canWrite: true,
         viewerRole: 'owner',
+        presentation: expect.objectContaining({
+          title: 'Deck',
+          markdownContent: '# Deck',
+        }),
+      }),
+    );
+  });
+
+  it('returns authorized read-only payload for workspace members', async () => {
+    const ctx = createQueryContext({
+      identitySubject: 'clerk_member',
+      user: { _id: 'user_member', clerkId: 'clerk_member' },
+      presentationById: {
+        _id: 'presentation_1',
+        workspaceId: 'workspace_1',
+        title: 'Deck',
+        markdownContent: '# Deck',
+        updatedAt: 1700000000000,
+        isPublicShareEnabled: false,
+      },
+      presentationByToken: null,
+      membership: {
+        workspaceId: 'workspace_1',
+        userId: 'user_member',
+        role: 'member',
+      },
+    });
+
+    const result = await (getPresentationRouteAccess as any).handler(ctx, {
+      presentationId: 'presentation_1',
+    });
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        status: 'authorized',
+        canWrite: false,
+        viewerRole: 'member',
       }),
     );
   });

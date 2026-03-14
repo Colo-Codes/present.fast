@@ -4,9 +4,21 @@ import { mutation } from '../_generated/server';
 import { assertWorkspaceWriteAccess } from '../lib/permissions';
 import { ensureUserAndDefaultWorkspace } from '../lib/provisioning';
 
+const DEFAULT_PRESENTATION_TITLE = 'Untitled presentation';
+const DEFAULT_MARKDOWN_CONTENT = '';
+
+const normalizeTitle = (title: string | undefined) => {
+  const trimmedTitle = title?.trim();
+  if (!trimmedTitle) {
+    return DEFAULT_PRESENTATION_TITLE;
+  }
+
+  return trimmedTitle;
+};
+
 export const createPresentation = mutation({
   args: {
-    title: v.string(),
+    title: v.optional(v.string()),
     markdownContent: v.optional(v.string()),
   },
   handler: async (ctx: any, args: any) => {
@@ -17,8 +29,8 @@ export const createPresentation = mutation({
     const presentationId = await ctx.db.insert('presentations', {
       workspaceId,
       createdByUserId: userId,
-      title: args.title.trim(),
-      markdownContent: args.markdownContent ?? '# New presentation',
+      title: normalizeTitle(args.title),
+      markdownContent: args.markdownContent ?? DEFAULT_MARKDOWN_CONTENT,
       isPublicShareEnabled: false,
       shareToken: undefined,
       createdAt: now,
@@ -33,7 +45,7 @@ export const updatePresentationMarkdown = mutation({
   args: {
     presentationId: v.id('presentations'),
     markdownContent: v.string(),
-    title: v.optional(v.string()),
+    title: v.string(),
   },
   handler: async (ctx: any, args: any) => {
     const { userId } = await ensureUserAndDefaultWorkspace(ctx);
@@ -45,13 +57,19 @@ export const updatePresentationMarkdown = mutation({
 
     await assertWorkspaceWriteAccess(ctx, presentation.workspaceId, userId);
 
+    const nextTitle = args.title.trim();
+    if (!nextTitle) {
+      throw new Error('Title cannot be empty.');
+    }
+
+    const updatedAt = Date.now();
     await ctx.db.patch(args.presentationId, {
       markdownContent: args.markdownContent,
-      title: args.title?.trim() || presentation.title,
-      updatedAt: Date.now(),
+      title: nextTitle,
+      updatedAt,
     });
 
-    return { presentationId: args.presentationId };
+    return { presentationId: args.presentationId, updatedAt, title: nextTitle };
   },
 });
 

@@ -1,21 +1,25 @@
 'use client';
 
 import { useMutation, useQuery } from 'convex/react';
-import { ExternalLink, Loader2, Plus, Share2 } from 'lucide-react';
+import { ArrowRight, ExternalLink, Loader2, Plus, Share2 } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { routes } from '@/config/routes';
 
 import { api } from '../../../../convex/_generated/api';
 
 export const PresentationLibrary = () => {
+  const router = useRouter();
   const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL;
-  const [newPresentationTitle, setNewPresentationTitle] = useState('');
   const [isCreatingPresentation, setIsCreatingPresentation] = useState(false);
   const [permissionError, setPermissionError] = useState<string | null>(null);
-  const [updatingSharePresentationId, setUpdatingSharePresentationId] = useState<string | null>(null);
+  const [updatingSharePresentationId, setUpdatingSharePresentationId] = useState<string | null>(
+    null,
+  );
 
   if (!convexUrl) {
     return (
@@ -39,17 +43,12 @@ export const PresentationLibrary = () => {
   );
 
   const handleCreatePresentation = async () => {
-    const trimmedTitle = newPresentationTitle.trim();
-    if (!trimmedTitle) {
-      return;
-    }
-
     setIsCreatingPresentation(true);
     setPermissionError(null);
 
     try {
-      await createPresentation({ title: trimmedTitle });
-      setNewPresentationTitle('');
+      const result = await createPresentation({});
+      router.push(routes.presentationById(result.presentationId as string));
     } catch (error) {
       setPermissionError(error instanceof Error ? error.message : 'Unable to create presentation.');
     } finally {
@@ -104,18 +103,14 @@ export const PresentationLibrary = () => {
           </p>
         ) : null}
 
-        <div className="flex flex-col gap-3 md:flex-row">
-          <input
-            className="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring h-10 rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:outline-none"
-            aria-label="New presentation title"
-            placeholder="e.g. My Q2 Product Demo"
-            value={newPresentationTitle}
-            onChange={(event) => setNewPresentationTitle(event.target.value)}
-          />
+        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <p className="text-muted-foreground text-sm">
+            Start with an untitled presentation, then rename and edit from the editor.
+          </p>
           <Button
             type="button"
             onClick={handleCreatePresentation}
-            disabled={!newPresentationTitle.trim() || isCreatingPresentation || !canWrite}
+            disabled={isCreatingPresentation || !canWrite}
           >
             {isCreatingPresentation ? (
               <>
@@ -163,8 +158,11 @@ export const PresentationLibrary = () => {
                 </div>
                 <div className="flex flex-wrap gap-2">
                   <Button asChild size="sm" variant="outline">
-                    <Link href={`/presentation/${presentation._id}`} aria-label="Open presentation">
-                      <ExternalLink className="mr-2 size-4" />
+                    <Link
+                      href={routes.presentationById(presentation._id as string)}
+                      aria-label="Open presentation"
+                    >
+                      <ArrowRight className="mr-2 size-4" />
                       Open
                     </Link>
                   </Button>
@@ -195,6 +193,7 @@ export const PresentationLibrary = () => {
                         target="_blank"
                         rel="noreferrer"
                       >
+                        <ExternalLink className="mr-2 size-4" />
                         View shared snapshot
                       </Link>
                     </Button>
