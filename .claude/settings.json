@@ -1,0 +1,19 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/sync-manuals-check.sh"
+          },
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/react-lint-on-edit.sh"
+          }
+        ]
+      }
+    ]
+  }
+}
