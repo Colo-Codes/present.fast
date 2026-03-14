@@ -50,8 +50,8 @@ const HomePage = () => {
               </Link>
             </Button>
             <Button asChild variant="outline" size="lg">
-              <Link href="/presentation" aria-label="View current presentation">
-                View current presentation
+              <Link href="/dashboard" aria-label="View presentation library">
+                View presentation library
               </Link>
             </Button>
           </div>

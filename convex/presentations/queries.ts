@@ -1,14 +1,18 @@
 import { v } from 'convex/values';
 
 import { query } from '../_generated/server';
-import { assertWorkspaceMembership } from '../lib/permissions';
+import {
+  assertWorkspaceReadAccess,
+  getUserByClerkIdOrThrow,
+  getWorkspaceMembership,
+} from '../lib/permissions';
 import { resolveCurrentUserWorkspaceOrThrow } from '../lib/provisioning';
 
 export const listPresentationsForCurrentWorkspace = query({
   args: {},
   handler: async (ctx: any) => {
     const { userId, workspaceId } = await resolveCurrentUserWorkspaceOrThrow(ctx);
-    await assertWorkspaceMembership(ctx, workspaceId, userId);
+    const membership = await assertWorkspaceReadAccess(ctx, workspaceId, userId);
 
     const presentations = await ctx.db
       .query('presentations')
@@ -18,7 +22,11 @@ export const listPresentationsForCurrentWorkspace = query({
       .order('desc')
       .collect();
 
-    return presentations;
+    return {
+      presentations,
+      viewerRole: membership.role,
+      canWrite: membership.role === 'owner',
+    };
   },
 });
 
@@ -34,8 +42,40 @@ export const getPresentationById = query({
       return null;
     }
 
-    await assertWorkspaceMembership(ctx, presentation.workspaceId, userId);
+    await assertWorkspaceReadAccess(ctx, presentation.workspaceId, userId);
     return presentation;
+  },
+});
+
+export const getPresentationRouteAccess = query({
+  args: {
+    presentationId: v.id('presentations'),
+  },
+  handler: async (ctx: any, args: any) => {
+    const identity = await ctx.auth.getUserIdentity();
+
+    if (!identity) {
+      return { status: 'unauthenticated' as const };
+    }
+
+    const user = await getUserByClerkIdOrThrow(ctx, identity.subject);
+    const presentation = await ctx.db.get(args.presentationId);
+
+    if (!presentation) {
+      return { status: 'not_found' as const };
+    }
+
+    const membership = await getWorkspaceMembership(ctx, presentation.workspaceId, user._id);
+    if (!membership) {
+      return { status: 'forbidden' as const };
+    }
+
+    return {
+      status: 'authorized' as const,
+      canWrite: membership.role === 'owner',
+      viewerRole: membership.role,
+      presentation,
+    };
   },
 });
 
@@ -55,6 +95,12 @@ export const getPublicPresentationByShareToken = query({
       return null;
     }
 
-    return presentation;
+    return {
+      presentationId: presentation._id,
+      title: presentation.title,
+      markdownContent: presentation.markdownContent,
+      updatedAt: presentation.updatedAt,
+      sharedAt: presentation.updatedAt,
+    };
   },
 });

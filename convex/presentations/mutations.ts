@@ -1,7 +1,7 @@
 import { v } from 'convex/values';
 
 import { mutation } from '../_generated/server';
-import { assertWorkspaceMembership } from '../lib/permissions';
+import { assertWorkspaceWriteAccess } from '../lib/permissions';
 import { ensureUserAndDefaultWorkspace } from '../lib/provisioning';
 
 export const createPresentation = mutation({
@@ -11,7 +11,7 @@ export const createPresentation = mutation({
   },
   handler: async (ctx: any, args: any) => {
     const { userId, workspaceId } = await ensureUserAndDefaultWorkspace(ctx);
-    await assertWorkspaceMembership(ctx, workspaceId, userId);
+    await assertWorkspaceWriteAccess(ctx, workspaceId, userId);
 
     const now = Date.now();
     const presentationId = await ctx.db.insert('presentations', {
@@ -43,7 +43,7 @@ export const updatePresentationMarkdown = mutation({
       throw new Error('Presentation not found.');
     }
 
-    await assertWorkspaceMembership(ctx, presentation.workspaceId, userId);
+    await assertWorkspaceWriteAccess(ctx, presentation.workspaceId, userId);
 
     await ctx.db.patch(args.presentationId, {
       markdownContent: args.markdownContent,
@@ -68,7 +68,7 @@ export const setPresentationShareState = mutation({
       throw new Error('Presentation not found.');
     }
 
-    await assertWorkspaceMembership(ctx, presentation.workspaceId, userId);
+    await assertWorkspaceWriteAccess(ctx, presentation.workspaceId, userId);
 
     const shareToken = args.isPublicShareEnabled
       ? crypto.randomUUID().replace(/-/g, '')

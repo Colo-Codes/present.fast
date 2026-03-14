@@ -1,5 +1,5 @@
 import { auth } from '@clerk/nextjs/server';
-import { ArrowRight, FolderOpenDot } from 'lucide-react';
+import { FolderOpenDot } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
@@ -37,8 +37,8 @@ const DashboardPage = async () => {
               </Link>
             </Button>
             <Button asChild variant="outline">
-              <Link href="/presentation" aria-label="Go to presentation page">
-                Presentation
+              <Link href="#presentation-workspace" aria-label="Go to presentation workspace">
+                Presentation workspace
               </Link>
             </Button>
             <ThemeToggle />
@@ -59,18 +59,15 @@ const DashboardPage = async () => {
               </CardDescription>
             </CardHeader>
             <CardContent className="flex flex-wrap items-center gap-3">
-              <Button asChild>
-                <Link href="/presentation" aria-label="Open current presentation">
-                  Open current presentation
-                  <ArrowRight data-icon="inline-end" className="size-4" />
-                </Link>
-              </Button>
-              <p className="text-muted-foreground text-sm">No saved presentations yet.</p>
+              <p className="text-muted-foreground text-sm">
+                Use the presentation workspace below to create decks and open authorized
+                `/presentation/[presentationId]` routes.
+              </p>
             </CardContent>
           </Card>
         </section>
 
-        <section aria-label="Presentation workspace">
+        <section id="presentation-workspace" aria-label="Presentation workspace">
           <PresentationLibrary />
         </section>
       </div>

@@ -1,6 +1,7 @@
 import { v } from 'convex/values';
 
-import { mutation } from '../_generated/server';
+import { internalMutation, mutation } from '../_generated/server';
+import { requireAuth } from '../auth';
 import { ensureUserAndDefaultWorkspace } from '../lib/provisioning';
 
 export const upsertUserArgs = v.object({
@@ -18,9 +19,14 @@ export const bootstrapCurrentUser = mutation({
   },
 });
 
-export const upsertUserFromClerk = mutation({
+export const upsertUserFromClerk = internalMutation({
   args: upsertUserArgs,
   handler: async (ctx: any, args: any) => {
+    const identity = await requireAuth(ctx);
+    if (identity.clerkId !== args.clerkId) {
+      throw new Error('Forbidden user upsert request.');
+    }
+
     const now = Date.now();
     const existingUser = await ctx.db
       .query('users')
