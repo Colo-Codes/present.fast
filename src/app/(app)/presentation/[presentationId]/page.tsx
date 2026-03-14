@@ -33,7 +33,7 @@ const PresentationByIdPage = async ({ params, searchParams }: PresentationPagePr
         <section className="mx-auto w-full max-w-4xl space-y-3">
           <h1 className="text-2xl font-semibold">Not authorized</h1>
           <p className="text-muted-foreground text-sm">
-            You are not authorized to access this deck.
+            You are not authorized to access this presentation.
           </p>
           <Link className="text-primary text-sm underline underline-offset-4" href="/dashboard">
             Return to dashboard

@@ -8,7 +8,6 @@ import type { Metadata } from 'next';
 import { Inter, JetBrains_Mono } from 'next/font/google';
 import type { ReactNode } from 'react';
 
-import { AuthHeader } from '@/components/auth/auth-header';
 import { ThemeProvider } from '@/components/theme-provider';
 import { cn } from '@/lib/utils';
 
@@ -35,10 +34,7 @@ const RootLayout = ({ children }: RootLayoutProps) => {
       <body className="bg-background text-foreground antialiased">
         <ClerkProvider>
           <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
-            <AppProviders>
-              <AuthHeader />
-              {children}
-            </AppProviders>
+            <AppProviders>{children}</AppProviders>
           </ThemeProvider>
         </ClerkProvider>
       </body>

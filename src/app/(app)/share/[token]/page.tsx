@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation';
 import PresentationSnapshot from '@/features/presentations/components/presentation-snapshot';
 import { fetchQuery } from '@/lib/convex/server';
 
-import { api } from '../../../../convex/_generated/api';
+import { api } from '../../../../../convex/_generated/api';
 
 type SharePageProps = {
   params: Promise<{
@@ -27,7 +27,7 @@ const SharedPresentationPage = async ({ params, searchParams }: SharePageProps) 
   if (e2e === 'snapshot' && token === 'e2e-valid-share-token') {
     return (
       <PresentationSnapshot
-        title="E2E Shared Deck"
+        title="E2E Shared Presentation"
         markdownContent="# E2E snapshot"
         updatedAt={1700000000000}
         sharedAtLabel="This is a shared snapshot view."

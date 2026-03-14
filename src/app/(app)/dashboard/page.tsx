@@ -60,7 +60,7 @@ const DashboardPage = async () => {
             </CardHeader>
             <CardContent className="flex flex-wrap items-center gap-3">
               <p className="text-muted-foreground text-sm">
-                Use the presentation workspace below to create decks and open authorized
+                Use the presentation workspace below to create presentations and open authorized
                 `/presentation/[presentationId]` routes.
               </p>
             </CardContent>
