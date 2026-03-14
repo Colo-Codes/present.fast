@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { parsePresentationMarkdownToSlides } from '@/lib/presentation-markdown-to-slides';
+import { parsePresentationMarkdownToSlides } from '@/features/presentations/lib/presentation-markdown-to-slides';
 
 const VALID_SLIDE_TYPES = new Set([
   'title',
@@ -19,7 +19,7 @@ describe('parsePresentationMarkdownToSlides', () => {
 
   it('maps heading and bullets into content slide', () => {
     const markdown = `
-# Deck title
+# Presentation title
 This is the intro paragraph.
 - First point
 - Second point
@@ -32,7 +32,7 @@ This is the intro paragraph.
       expect.objectContaining({
         id: 1,
         type: 'content',
-        title: 'Deck title',
+        title: 'Presentation title',
         bullets: ['First point', 'Second point'],
       }),
     );

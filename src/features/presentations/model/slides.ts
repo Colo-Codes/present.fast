@@ -33,7 +33,7 @@ export const slides: SlideData[] = [
     type: 'title',
     sources: [
       {
-        label: 'No Vibes Allowed \u2014 Dex Horthy, HumanLayer',
+        label: 'No Vibes Allowed — Dex Horthy, HumanLayer',
         url: 'https://www.youtube.com/watch?v=rmvDxxNubIg',
       },
     ],
@@ -62,11 +62,11 @@ export const slides: SlideData[] = [
   {
     id: 3,
     title: 'AI Productivity by Project Type',
-    subtitle: 'Greenfield projects gain 30\u201335% on simple tasks vs 15\u201320% in brownfield',
+    subtitle: 'Greenfield projects gain 30–35% on simple tasks vs 15–20% in brownfield',
     type: 'image',
     image:
       'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-qmNEOCJqcFYJQHi3IzkzgqPNG1b56G.png',
-    imageAlt: 'Software Engineering Productivity Increases from AI Use \u2014 Stanford University',
+    imageAlt: 'Software Engineering Productivity Increases from AI Use — Stanford University',
     imageCaption:
       'When the model does not have context, it fills gaps with guesses. Those guesses often compile, but they do not fit the system.',
     sources: [
@@ -85,16 +85,16 @@ export const slides: SlideData[] = [
     type: 'image',
     image:
       'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image%201-CSmgHOJWgsSmoJUN14Lc7PQU1T35Tn.png',
-    imageAlt: 'Adopting AI didn\u2019t increase effective output and increased rework by 2.6x',
+    imageAlt: 'Adopting AI didn’t increase effective output and increased rework by 2.6x',
     imageCaption:
-      'Adopting AI didn\u2019t increase \u201ceffective output\u201d and increased rework by 2.6x. Not lines of code, but a metric that replicates a panel of human experts.',
+      'Adopting AI didn’t increase “effective output” and increased rework by 2.6x. Not lines of code, but a metric that replicates a panel of human experts.',
     sources: [
       {
         label: 'Stanford study on 100,000 developers on engineering productivity',
         url: 'https://proxify.io/articles/stanford-study-of-100000-developers-on-engineering-productivity',
       },
       {
-        label: 'No Vibes Allowed \u2014 Dex Horthy, HumanLayer',
+        label: 'No Vibes Allowed — Dex Horthy, HumanLayer',
         url: 'https://www.youtube.com/watch?v=rmvDxxNubIg',
       },
     ],
@@ -109,8 +109,8 @@ export const slides: SlideData[] = [
       'The current best working solution to the problem of AI guessing solutions is applying good context engineering.',
     ],
     quote:
-      'Building with language models is becoming less about finding the right words and phrases for your prompts (prompt engineering), and more about answering the broader question of \u201cwhat configuration of context is most likely to generate our model\u2019s desired behavior?\u201d',
-    quoteSource: 'Anthropic \u2014 Effective context engineering for AI agents',
+      'Building with language models is becoming less about finding the right words and phrases for your prompts (prompt engineering), and more about answering the broader question of “what configuration of context is most likely to generate our model’s desired behavior?”',
+    quoteSource: 'Anthropic — Effective context engineering for AI agents',
     sources: [
       {
         label: 'Effective context engineering for AI agents',
@@ -128,7 +128,7 @@ export const slides: SlideData[] = [
       'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image%202-nYbiC0AtwPwcML32KIajM4IvNXW3zQ.png',
     imageAlt: 'Prompt engineering for single turn queries vs Context engineering for agents',
     imageCaption:
-      'Context engineering is about curating the right docs, tools, memory files, and instructions into the context window \u2014 not just crafting a single prompt.',
+      'Context engineering is about curating the right docs, tools, memory files, and instructions into the context window — not just crafting a single prompt.',
     sources: [
       {
         label: 'Effective context engineering for AI agents',
@@ -141,15 +141,15 @@ export const slides: SlideData[] = [
   {
     id: 7,
     title: 'Suboptimal Agent Usage',
-    subtitle: 'The \u201cimplement X and steer\u201d anti-pattern',
+    subtitle: 'The “implement X and steer” anti-pattern',
     type: 'content',
     content: [
-      'The inefficient way to use an AI agent is to say \u201cimplement X\u201d and then steer it with a long back-and-forth: \u201cDon\u2019t do that, do this\u2026\u201d',
+      'The inefficient way to use an AI agent is to say “implement X” and then steer it with a long back-and-forth: “Don’t do that, do this…”',
       'This approach is slow and inefficient because:',
     ],
     bullets: [
       'The agent is constantly re-orienting',
-      'You are debugging the agent\u2019s assumptions instead of the code',
+      'You are debugging the agent’s assumptions instead of the code',
       '==Rework== needs to be done',
       'The conversation accumulates noise that makes the agent worse over time',
     ],
@@ -170,7 +170,7 @@ export const slides: SlideData[] = [
       'A ==plan== or structure for how the change should be approached',
     ],
     content2: [
-      'You don\u2019t need to provide all of this by hand. You can leverage the agent (or subagents) to help you build this.',
+      'You don’t need to provide all of this by hand. You can leverage the agent (or subagents) to help you build this.',
     ],
   },
 
@@ -215,7 +215,7 @@ export const slides: SlideData[] = [
     type: 'split',
     content: [
       'The more you reuse the same chat session (the context window), the less effective the agent becomes. Past a certain point, important details get drowned out by older, less relevant content.',
-      'In my experience, \u201cthe dumb zone\u201d starts from 60% of the context window usage. When that happens I switch to another chat session.',
+      'In my experience, “the dumb zone” starts from 60% of the context window usage. When that happens I switch to another chat session.',
     ],
     bullets: [
       'Keep only relevant information in the chat',
@@ -227,7 +227,7 @@ export const slides: SlideData[] = [
     imageAlt: 'The smart zone vs the dumb zone in context window usage',
     sources: [
       {
-        label: 'No Vibes Allowed \u2014 Dex Horthy, HumanLayer',
+        label: 'No Vibes Allowed — Dex Horthy, HumanLayer',
         url: 'https://www.youtube.com/watch?v=rmvDxxNubIg',
       },
       {
@@ -243,7 +243,7 @@ export const slides: SlideData[] = [
     title: 'Managing Context with Subagents',
     type: 'split',
     content: [
-      'Subagents are not primarily for \u201croleplay\u201d (e.g. \u201cQA Engineer\u201d or \u201cSEO Expert\u201d). They are a tool for controlling how much context the main agent has to carry.',
+      'Subagents are not primarily for “roleplay” (e.g. “QA Engineer” or “SEO Expert”). They are a tool for controlling how much context the main agent has to carry.',
     ],
     bullets: [
       'Read code and map how a feature works',
@@ -269,20 +269,19 @@ export const slides: SlideData[] = [
     subtitle: 'Another approach to mitigate guessing in AI agents',
     type: 'split',
     content: [
-      'Add AGENTS.md files in important directories to provide \u201clocal context\u201d \u2014 ownership, conventions, and architecture notes.',
+      'Add AGENTS.md files in important directories to provide “local context” — ownership, conventions, and architecture notes.',
       'This helps, but it can drift over time. Treat it like documentation: useful, but only if maintained.',
     ],
     bullets: [
-      'Don\u2019t document files \u2014 they ARE the source of truth',
-      'Layer context from org \u2192 team \u2192 repo \u2192 module \u2192 file',
+      'Don’t document files — they ARE the source of truth',
+      'Layer context from org → team → repo → module → file',
     ],
     image:
       'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Screenshot_2026-03-02_at_11.22.00_am-UBaWe9umWMKbiTVZM0hLMbI8Ighhf9.png',
-    imageAlt:
-      'Org to team to repos hierarchy \u2014 Don\u2019t Document files, they ARE the source of truth',
+    imageAlt: 'Org to team to repos hierarchy — Don’t Document files, they ARE the source of truth',
     sources: [
       {
-        label: 'No Vibes Allowed \u2014 Dex Horthy, HumanLayer',
+        label: 'No Vibes Allowed — Dex Horthy, HumanLayer',
         url: 'https://www.youtube.com/watch?v=rmvDxxNubIg',
       },
     ],
@@ -292,11 +291,11 @@ export const slides: SlideData[] = [
   {
     id: 13,
     title: 'The RPI Framework',
-    subtitle: 'Research \u2192 Plan \u2192 Implement',
+    subtitle: 'Research → Plan → Implement',
     type: 'highlight',
     highlight: 'R  P  I',
     highlightSub:
-      'A lightweight way to manage the agent\u2019s context so you get predictable, correct output. It follows a three-step process.',
+      'A lightweight way to manage the agent’s context so you get predictable, correct output. It follows a three-step process.',
     sources: [
       {
         label: 'HumanLayer RPI Framework',
@@ -313,12 +312,12 @@ export const slides: SlideData[] = [
     badge: 'Research',
     content: [
       'Goal: build an objective, reliable picture of how the system works.',
-      'A practical pattern is to treat Research as producing a single artifact: a research.md document that contains only verified facts about the current system \u2014 no implementation plan, no guesses or opinions.',
+      'A practical pattern is to treat Research as producing a single artifact: a research.md document that contains only verified facts about the current system — no implementation plan, no guesses or opinions.',
     ],
     bullets: [
       'Understand the current behaviour and architecture',
       'Find the relevant files and entry points',
-      'Stay objective \u2014 describe what is, not what you think is wrong',
+      'Stay objective — describe what is, not what you think is wrong',
       'Leverage subagents so the main agent stays grounded in the codebase truth',
     ],
     codeBlock: `==/research_codebase==
@@ -342,7 +341,7 @@ Also include requirements described in ==docs/tickets/ABC-742-save-for-later-car
     content: [
       'Goal: make the work explicit before you start changing code.',
       'The Plan phase should result in a concrete sequence of steps. It is a good sign if the plan includes small code snippets or pseudo-diffs showing what will change.',
-      'Important: do not outsource thinking. Read the plan, modify it, expand or cut it \u2014 the human stays in the loop.',
+      'Important: do not outsource thinking. Read the plan, modify it, expand or cut it — the human stays in the loop.',
     ],
     bullets: [
       'Outline the implementation steps',
@@ -355,7 +354,7 @@ Also include requirements described in ==docs/tickets/ABC-742-save-for-later-car
     imageAlt: 'research.md + PRD/Ticket flowing into /create_plan producing plan.md',
     sources: [
       {
-        label: 'No Vibes Allowed \u2014 Dex Horthy, HumanLayer',
+        label: 'No Vibes Allowed — Dex Horthy, HumanLayer',
         url: 'https://www.youtube.com/watch?v=rmvDxxNubIg',
       },
     ],
@@ -377,7 +376,7 @@ Also include requirements described in ==docs/tickets/ABC-742-save-for-later-car
     type: 'split',
     badge: 'Implement',
     content: [
-      'Goal: execute a plan that is already \u201cthought through.\u201d',
+      'Goal: execute a plan that is already “thought through.”',
       'If the research and planning were done properly, implementation is usually straightforward.',
     ],
     bullets: [
@@ -398,20 +397,20 @@ Also include requirements described in ==docs/tickets/ABC-742-save-for-later-car
     type: 'split',
     content: [
       'Very small changes may not need a detailed research document. Very complex changes may need deeper research and more detailed planning.',
-      'The \u201csweet spot\u201d is found through practice.',
+      'The “sweet spot” is found through practice.',
     ],
     bullets: [
-      'Small fixes \u2192 just talk to Claude',
-      'Small features across 3\u20135 files \u2192 make a simple plan, then work the plan',
-      'Medium features across multiple repos \u2192 do 1 research, then build a plan, then implement phase by phase',
-      'Big refactors and whole new features \u2192 multiple research steps, multiple plans, many implement sessions',
+      'Small fixes → just talk to Claude',
+      'Small features across 3–5 files → make a simple plan, then work the plan',
+      'Medium features across multiple repos → do 1 research, then build a plan, then implement phase by phase',
+      'Big refactors and whole new features → multiple research steps, multiple plans, many implement sessions',
     ],
     image:
       'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Screenshot_2026-03-02_at_11.33.49_am-6Y4XqdHAe21s9GTSmjR5TrWLitoPhg.png',
     imageAlt: 'Chart showing harder problems require more compaction and context engineering',
     sources: [
       {
-        label: 'No Vibes Allowed \u2014 Dex Horthy, HumanLayer',
+        label: 'No Vibes Allowed — Dex Horthy, HumanLayer',
         url: 'https://www.youtube.com/watch?v=rmvDxxNubIg',
       },
     ],
@@ -422,14 +421,14 @@ Also include requirements described in ==docs/tickets/ABC-742-save-for-later-car
     id: 20,
     title: 'Closing Thoughts',
     type: 'content',
-    content: ['==The role of the developer is evolving.== Here\u2019s what matters now:'],
+    content: ['==The role of the developer is evolving.== Here’s what matters now:'],
     bullets: [
-      'Things are changing\u2026 ==fast==',
+      'Things are changing… ==fast==',
       'Developers are starting to ==write less code== and ==read more code== (code outputs from agents, PRs)',
       'A ==baseline== for how to use AI needs to be shared across the team so everyone has a good starting point',
       'Teams still need ==deep knowledge== of their tools and frameworks',
       'Developers are evolving from pure implementers into ==system designers== (architects) and reviewers',
-      'Cultural change may be needed for AI agents to work well in a team setting \u2014 ==not everyone is on board==',
+      'Cultural change may be needed for AI agents to work well in a team setting — ==not everyone is on board==',
     ],
   },
 

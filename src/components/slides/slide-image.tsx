@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { Maximize2 } from 'lucide-react';
 import { useState } from 'react';
 
-import type { SlideData } from '@/lib/slides';
+import type { SlideData } from '@/features/presentations/model/slides';
 
 import { ImageLightbox } from './image-lightbox';
 import { SourceFooter } from './source-footer';

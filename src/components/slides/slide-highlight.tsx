@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 
-import type { SlideData } from '@/lib/slides';
+import type { SlideData } from '@/features/presentations/model/slides';
 
 import { SourceFooter } from './source-footer';
 import { renderTextWithHighlights } from './text-highlights';

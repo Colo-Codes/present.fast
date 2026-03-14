@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion';
 import { ExternalLink } from 'lucide-react';
 
-import type { SlideSource } from '@/lib/slides';
+import type { SlideSource } from '@/features/presentations/model/slides';
 
 export function SourceFooter({ sources }: { sources?: SlideSource[] }) {
   if (!sources || sources.length === 0) return null;

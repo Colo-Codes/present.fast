@@ -4,19 +4,18 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import type { SlideData } from '@/lib/slides';
-import { slides as defaultSlides } from '@/lib/slides';
-
-import { CursorTrail } from './cursor-trail';
-import { SlideContent } from './slide-content';
-import { SlideHighlight } from './slide-highlight';
-import { SlideImage } from './slide-image';
-import { SlideNav } from './slide-nav';
-import { SlideProgress } from './slide-progress';
-import { SlideQuote } from './slide-quote';
-import { SlideSplit } from './slide-split';
-import { SlideThreeColumn } from './slide-three-column';
-import { SlideTitle } from './slide-title';
+import { CursorTrail } from '@/components/slides/cursor-trail';
+import { SlideContent } from '@/components/slides/slide-content';
+import { SlideHighlight } from '@/components/slides/slide-highlight';
+import { SlideImage } from '@/components/slides/slide-image';
+import { SlideNav } from '@/components/slides/slide-nav';
+import { SlideProgress } from '@/components/slides/slide-progress';
+import { SlideQuote } from '@/components/slides/slide-quote';
+import { SlideSplit } from '@/components/slides/slide-split';
+import { SlideThreeColumn } from '@/components/slides/slide-three-column';
+import { SlideTitle } from '@/components/slides/slide-title';
+import type { SlideData } from '@/features/presentations/model/slides';
+import { slides as defaultSlides } from '@/features/presentations/model/slides';
 
 const slideVariants = {
   enter: (direction: number) => ({
@@ -62,8 +61,6 @@ const SlideRenderer = ({ slide }: { slide: SlideData }) => {
 };
 
 const getSlideParentTopic = (slideId: number) => {
-  // Derived from:
-  // ~/Downloads/Private & Shared 2/Antares Presentation 31766ef7d771804cb781f8045a8ab5f9.md
   if (slideId === 1) return 'Research Plan Implement (RPI) framework for working with AI agents';
   if (slideId >= 2 && slideId <= 6) return 'Introduction';
   if (slideId >= 7 && slideId <= 12) return 'Suboptimal vs optimal agent usage';
@@ -72,17 +69,17 @@ const getSlideParentTopic = (slideId: number) => {
   return 'Antares Presentation';
 };
 
-type SlideDeckProps = {
+type PresentationSlidesProps = {
   slides?: SlideData[];
   presentationTitle?: string;
   onExitPresentation?: () => void | Promise<void>;
 };
 
-export function SlideDeck({
+export const PresentationSlides = ({
   slides: slidesProp,
   presentationTitle,
   onExitPresentation,
-}: SlideDeckProps) {
+}: PresentationSlidesProps) => {
   const router = useRouter();
   const slides = slidesProp ?? defaultSlides;
   const HOVER_OUT_DEBOUNCE_MS = 140;
@@ -118,7 +115,7 @@ export function SlideDeck({
       setDirection(index > currentSlide ? 1 : -1);
       setCurrentSlide(index);
     },
-    [currentSlide],
+    [currentSlide, slides.length],
   );
 
   const nextSlide = useCallback(() => {
@@ -175,25 +172,25 @@ export function SlideDeck({
   }, []);
 
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key.toLowerCase() === 'p') {
-        e.preventDefault();
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key.toLowerCase() === 'p') {
+        event.preventDefault();
         togglePointerMode();
         return;
       }
 
-      if (e.key === 'Escape') {
+      if (event.key === 'Escape') {
         if (!isPointerModeActive) return;
-        e.preventDefault();
+        event.preventDefault();
         deactivatePointerMode();
         return;
       }
 
-      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'Enter') {
-        e.preventDefault();
+      if (event.key === 'ArrowRight' || event.key === ' ' || event.key === 'Enter') {
+        event.preventDefault();
         nextSlide();
-      } else if (e.key === 'ArrowLeft' || e.key === 'Backspace') {
-        e.preventDefault();
+      } else if (event.key === 'ArrowLeft' || event.key === 'Backspace') {
+        event.preventDefault();
         prevSlide();
       }
     };
@@ -202,24 +199,23 @@ export function SlideDeck({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [deactivatePointerMode, isPointerModeActive, nextSlide, prevSlide, togglePointerMode]);
 
-  // Touch/swipe support
   const touchStart = useRef<number | null>(null);
   const currentSlideData = slides[currentSlide];
-  const fallbackDeckTitle = 'Antares Presentation';
-  const deckTitle = presentationTitle?.trim() || fallbackDeckTitle;
+  const fallbackPresentationTitle = 'Antares Presentation';
+  const presentationLabel = presentationTitle?.trim() || fallbackPresentationTitle;
   const parentTopic = getSlideParentTopic(currentSlideData?.id ?? 0);
   const breadcrumbParts = isUsingDefaultSlides
-    ? [deckTitle, parentTopic, currentSlideData?.title ?? 'Slide']
-    : [deckTitle, currentSlideData?.title ?? 'Slide'];
+    ? [presentationLabel, parentTopic, currentSlideData?.title ?? 'Slide']
+    : [presentationLabel, currentSlideData?.title ?? 'Slide'];
 
-  const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    touchStart.current = e.touches[0].clientX;
+  const handleTouchStart = useCallback((event: React.TouchEvent) => {
+    touchStart.current = event.touches[0].clientX;
   }, []);
 
   const handleTouchEnd = useCallback(
-    (e: React.TouchEvent) => {
+    (event: React.TouchEvent) => {
       if (touchStart.current === null) return;
-      const diff = touchStart.current - e.changedTouches[0].clientX;
+      const diff = touchStart.current - event.changedTouches[0].clientX;
       if (Math.abs(diff) > 50) {
         if (diff > 0) nextSlide();
         else prevSlide();
@@ -338,7 +334,6 @@ export function SlideDeck({
         </button>
       </div>
 
-      {/* Subtle background pattern */}
       <div className="absolute inset-0 opacity-[0.03]">
         <div
           className="absolute inset-0"
@@ -349,7 +344,6 @@ export function SlideDeck({
         />
       </div>
 
-      {/* Ambient glow */}
       <motion.div
         className="absolute top-[-20%] right-[-10%] h-[600px] w-[600px] rounded-full opacity-[0.04]"
         style={{ background: 'radial-gradient(circle, var(--primary) 0%, transparent 70%)' }}
@@ -406,46 +400,45 @@ export function SlideDeck({
         hasNext={currentSlide < slides.length - 1}
       />
 
-      {/* Slide indicator dots */}
       <div className="fixed bottom-10 left-1/2 z-50 flex h-[30px] -translate-x-1/2 items-center gap-1.5">
-        {slides.map((_, i) => (
+        {slides.map((_, index) => (
           <button
-            key={i}
-            onClick={() => goToSlide(i)}
+            key={index}
+            onClick={() => goToSlide(index)}
             onPointerEnter={(event) => {
               if (event.pointerType !== 'mouse') return;
-              handleDotPointerEnter(i);
+              handleDotPointerEnter(index);
             }}
             onPointerLeave={(event) => {
               if (event.pointerType !== 'mouse') return;
-              handleDotPointerLeave(i);
+              handleDotPointerLeave(index);
             }}
             onFocus={() => {
-              handleDotPointerEnter(i);
+              handleDotPointerEnter(index);
             }}
             onBlur={() => {
               setHoveredDot((previousHoveredDot) =>
-                previousHoveredDot === i ? null : previousHoveredDot,
+                previousHoveredDot === index ? null : previousHoveredDot,
               );
             }}
             className={`group focus-visible:ring-primary/50 flex items-center justify-center rounded-full transition-all duration-300 hover:cursor-pointer focus-visible:ring-2 focus-visible:outline-none ${
-              i === currentSlide
+              index === currentSlide
                 ? 'bg-primary'
                 : 'bg-muted-foreground/30 hover:bg-muted-foreground/50'
-            } ${hoveredDot === i ? 'h-[30px] w-[30px]' : 'h-3 w-3'}`}
-            aria-label={`Go to slide ${i + 1}`}
-            aria-current={i === currentSlide ? 'true' : undefined}
+            } ${hoveredDot === index ? 'h-[30px] w-[30px]' : 'h-3 w-3'}`}
+            aria-label={`Go to slide ${index + 1}`}
+            aria-current={index === currentSlide ? 'true' : undefined}
           >
             <span
               className={`text-primary-foreground text-[16px] leading-none font-medium transition-opacity duration-200 ${
-                hoveredDot === i ? 'opacity-100' : 'opacity-0'
+                hoveredDot === index ? 'opacity-100' : 'opacity-0'
               }`}
             >
-              {i + 1}
+              {index + 1}
             </span>
           </button>
         ))}
       </div>
     </div>
   );
-}
+};

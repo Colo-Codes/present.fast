@@ -1,4 +1,4 @@
-import type { SlideData } from '@/lib/slides';
+import type { SlideData } from '@/features/presentations/model/slides';
 
 const SLIDE_DELIMITER_REGEX = /^---\s*$/m;
 const HEADING_REGEX = /^#{1,6}\s+(.+)$/;
@@ -14,9 +14,7 @@ const splitMarkdownIntoSections = (markdown: string) => {
 };
 
 const compactContent = (values: string[]) => {
-  return values
-    .map((value) => value.trim())
-    .filter((value) => value.length > 0);
+  return values.map((value) => value.trim()).filter((value) => value.length > 0);
 };
 
 const parseSectionToSlide = (section: string, index: number): SlideData | null => {
@@ -41,15 +39,11 @@ const parseSectionToSlide = (section: string, index: number): SlideData | null =
   const headingText = headingMatch?.[1]?.trim() ?? '';
 
   const bulletItems = compactContent(
-    lines
-      .map((line) => line.match(BULLET_REGEX)?.[1] ?? '')
-      .filter((line) => line.length > 0),
+    lines.map((line) => line.match(BULLET_REGEX)?.[1] ?? '').filter((line) => line.length > 0),
   );
 
   const quoteLines = compactContent(
-    lines
-      .map((line) => line.match(QUOTE_REGEX)?.[1] ?? '')
-      .filter((line) => line.length > 0),
+    lines.map((line) => line.match(QUOTE_REGEX)?.[1] ?? '').filter((line) => line.length > 0),
   );
 
   const imageMatch = trimmedSection.match(IMAGE_REGEX);

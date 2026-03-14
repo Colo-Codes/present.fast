@@ -4,10 +4,10 @@ import { ArrowLeft, LayoutDashboard } from 'lucide-react';
 import Link from 'next/link';
 import { useMemo } from 'react';
 
-import { SlideDeck } from '@/components/slides/slide-deck';
 import { Button } from '@/components/ui/button';
 import { routes } from '@/config/routes';
-import { parsePresentationMarkdownToSlides } from '@/lib/presentation-markdown-to-slides';
+import { PresentationSlides } from '@/features/presentations/components/slides/presentation-slides';
+import { parsePresentationMarkdownToSlides } from '@/features/presentations/lib/presentation-markdown-to-slides';
 
 type PresentationDisplayScaffoldProps = {
   presentationId: string;
@@ -66,7 +66,8 @@ const PresentationDisplayScaffold = ({
         <section className="mx-auto w-full max-w-4xl space-y-4">
           <h1 className="text-3xl font-semibold">{title}</h1>
           <p className="text-destructive text-sm" role="alert" aria-live="assertive">
-            We could not render this saved markdown as slides. Please return to edit mode to update it.
+            We could not render this saved markdown as slides. Please return to edit mode to update
+            it.
           </p>
           <div className="flex flex-wrap items-center gap-3">
             <Button asChild type="button">
@@ -92,7 +93,9 @@ const PresentationDisplayScaffold = ({
       <main className="min-h-screen px-6 py-10 md:px-10">
         <section className="mx-auto w-full max-w-4xl space-y-4">
           <h1 className="text-3xl font-semibold">{title}</h1>
-          <p className="text-muted-foreground text-sm">No slides were found in the saved markdown.</p>
+          <p className="text-muted-foreground text-sm">
+            No slides were found in the saved markdown.
+          </p>
           <div className="flex flex-wrap items-center gap-3">
             <Button asChild type="button">
               <Link href={editorHref} aria-label="Back to editor">
@@ -125,7 +128,7 @@ const PresentationDisplayScaffold = ({
           Last saved {new Date(updatedAt).toLocaleString()}
         </p>
       </div>
-      <SlideDeck slides={parsedSlides} presentationTitle={title} />
+      <PresentationSlides slides={parsedSlides} presentationTitle={title} />
     </div>
   );
 };

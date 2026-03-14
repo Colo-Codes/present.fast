@@ -33,12 +33,9 @@ type PresentationRouteViewProps = {
 };
 
 const PresentationRouteView = ({ presentationId, mode }: PresentationRouteViewProps) => {
-  const accessResult = useQuery(
-    api.presentations.queries.getPresentationRouteAccess as any,
-    {
-      presentationId: presentationId as Id<'presentations'>,
-    },
-  ) as PresentationRouteAccess | undefined;
+  const accessResult = useQuery(api.presentations.queries.getPresentationRouteAccess as any, {
+    presentationId: presentationId as Id<'presentations'>,
+  }) as PresentationRouteAccess | undefined;
 
   if (accessResult === undefined) {
     return (
@@ -59,7 +56,10 @@ const PresentationRouteView = ({ presentationId, mode }: PresentationRouteViewPr
             <p className="text-muted-foreground text-sm">
               Please sign in to access this presentation.
             </p>
-            <Link className="text-primary text-sm underline underline-offset-4" href={routes.signIn}>
+            <Link
+              className="text-primary text-sm underline underline-offset-4"
+              href={routes.signIn}
+            >
               Go to sign in
             </Link>
           </section>
@@ -71,9 +71,12 @@ const PresentationRouteView = ({ presentationId, mode }: PresentationRouteViewPr
           <section className="mx-auto w-full max-w-4xl space-y-3">
             <h1 className="text-2xl font-semibold">Not authorized</h1>
             <p className="text-muted-foreground text-sm">
-              You are not authorized to access this deck.
+              You are not authorized to access this presentation.
             </p>
-            <Link className="text-primary text-sm underline underline-offset-4" href={routes.dashboard}>
+            <Link
+              className="text-primary text-sm underline underline-offset-4"
+              href={routes.dashboard}
+            >
               Return to dashboard
             </Link>
           </section>
@@ -117,7 +120,7 @@ const PresentationRouteView = ({ presentationId, mode }: PresentationRouteViewPr
           title={accessResult.presentation.title}
           markdownContent={accessResult.presentation.markdownContent}
           updatedAt={accessResult.presentation.updatedAt}
-          sharedAtLabel="You have read-only access to this deck."
+          sharedAtLabel="You have read-only access to this presentation."
         />
       );
     default: {
